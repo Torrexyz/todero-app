@@ -1,0 +1,35 @@
+{
+  "name": "todero-api",
+  "version": "1.0.0",
+  "description": "Backend for Todero",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "imports": {
+    "#config/*": "./src/config/*.js",
+    "#controllers/*": "./src/controllers/*.js",
+    "#middlewares/*": "./src/midlewares/*.js",
+    "#models/*": "./src/models/*.js",
+    "#routes/*": "./src/routes/*.js",
+    "#utils/*": "./src/utils/*.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@paralleldrive/cuid2": "^3.3.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "nanoid": "^6.0.1",
+    "pg": "^8.23.0",
+    "uuid": "^14.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

@@ -1,0 +1,92 @@
+.inputLine {
+  display: block;
+  margin: 20px 0;
+  width: 100%;
+  position: relative;
+
+  & > input[type="text"] {
+    background-color: white;
+    border: 2px solid rgb(100, 100, 100);
+    color: rgb(50, 50, 50);
+    font-size: 1.2rem;
+    padding: 10px 20px;
+    width: 100%;
+    outline: none;
+
+    &:focus {
+      background-color: white;
+      border-style: dashed;
+    }
+  }
+
+  & > ul {
+    list-style: none;
+    border: 1px solid;
+  }
+}
+
+.suggestBox {
+  background: white;
+  box-shadow: 8px 8px 0px 0px #d8d8d8;
+  border: 3px solid #d8d8d8;
+  border-radius: 10px;
+  margin-top: 7px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  & > .suggestItem {
+    padding: 10px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover,
+    &.selected {
+      background-color: #eaeaea;
+    }
+
+    & > div > .command {
+      background-color: rgb(120, 120, 120);
+      font: bold 1em monospace;
+      color: white;
+      display: table;
+      margin-bottom: 4px;
+    }
+
+    & > div > .description {
+      font-size: 14px;
+      color: #666;
+    }
+  }
+}
+
+.helpInfoPopup {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  & > .suggestBox {
+    max-height: 80%;
+    max-width: 700px;
+    width: 100%;
+  }
+}

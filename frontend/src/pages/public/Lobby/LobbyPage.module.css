@@ -1,0 +1,33 @@
+.lobbyPage {
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  width: 100%;
+  user-select: none;
+
+  & > main:first-of-type {
+    border: 3px solid rgb(50, 50, 50);
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 60px;
+  }
+}
+
+h1.title {
+  display: block;
+  text-align: center;
+  font-size: 10rem;
+}
+
+h2.subtitle {
+  display: block;
+  text-align: center;
+  font-size: 3rem;
+
+  & > span {
+    font-size: 0.5em;
+    font-weight: lighter;
+  }
+}

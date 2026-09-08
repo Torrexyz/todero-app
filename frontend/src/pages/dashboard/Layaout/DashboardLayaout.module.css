@@ -1,0 +1,18 @@
+.dashboardLayaout {
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  width: 100%;
+  user-select: none;
+
+  & > main:first-of-type {
+    border: 2px solid rgb(50, 50, 50);
+    border-radius: 0 0 10px 10px;
+    display: flex;
+    height: 80%;
+    width: var(--dashboard-layaout-width);
+    overflow: auto;
+  }
+}

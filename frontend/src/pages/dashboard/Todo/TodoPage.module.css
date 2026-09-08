@@ -1,0 +1,13 @@
+.todoPage {
+  padding: 30px;
+  width: 100%;
+  position: relative;
+  overflow: hidden auto;
+}
+
+h1.title {
+  align-items: center;
+  display: flex;
+  font-weight: lighter;
+  width: 100%;
+}

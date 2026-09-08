@@ -1,0 +1,22 @@
+ul.taskList {
+  border-top: 2px solid rgb(100, 100, 100);
+  list-style-type: none;
+  margin-top: 10px;
+  padding-top: 20px;
+
+  & > li {
+    background-color: #e8e8e8;
+    cursor: pointer;
+    display: block;
+    padding: 10px 20px;
+    width: 100%;
+
+    &:not(:first-of-type) {
+      margin-top: 10px;
+    }
+
+    &:last-of-type {
+      margin-bottom: 30px;
+    }
+  }
+}

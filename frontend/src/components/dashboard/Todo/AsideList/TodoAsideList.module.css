@@ -1,0 +1,18 @@
+ul.asideList {
+  border-right: 2px solid rgb(50, 50, 50);
+  list-style-type: none;
+  padding: 20px;
+  width: 250px;
+
+  & > li {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    margin: 10px;
+    width: 100%;
+  }
+
+  & > hr {
+    margin: 20px 0 15px;
+  }
+}

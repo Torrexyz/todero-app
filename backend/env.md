@@ -1,0 +1,11 @@
+# PostgreSQL
+- DB_USER
+- DB_PASSWORD
+- DB_HOST
+- DB_PORT
+- DB_NAME
+
+# Servidor
+- PORT
+- NODE_ENV
+- APP_VERSION
