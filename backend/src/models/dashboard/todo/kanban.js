@@ -1,4 +1,5 @@
 import { query } from "#config/dbconn";
+
 import { generateKbcId } from "#utils/crypto";
 
 //====================//

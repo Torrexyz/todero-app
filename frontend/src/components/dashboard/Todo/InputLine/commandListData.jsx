@@ -1,23 +1,10 @@
+import { consolInfo } from "@utils/consol";
+
 import styles from "./TodoInputLine.module.css";
 
 //====================//
 
 export const COMMAND_LIST_DATA = {
-  //..........//
-
-  "create-task": {
-    args: true,
-    description:
-      "Crea una nueva tarea: Define tus metas comenzando solo con un titulo",
-    usage: "/create-task [título]",
-    auxcall: (data) => {
-      const [taskId, taskData] = data;
-      console.log(
-        `#DOM:INFO > Append new task "${taskData.title}" with reference ${taskId}`,
-      );
-    },
-  },
-
   //..........//
 
   "create-project": {
@@ -26,9 +13,9 @@ export const COMMAND_LIST_DATA = {
       "Crea un nuevo proyecto: Organiza y clasifica tus tareas creadas",
     usage: "/create-project [nombre]",
     auxcall: (data) => {
-      const [projectId, projectData] = data;
-      console.log(
-        `#DOM:INFO > Append new project "${projectData.pname}" with reference ${projectId}`,
+      consolInfo(
+        "#DOM:INFO",
+        `Append new project "${data.pname}" with reference '${data.public_id}'`,
       );
     },
   },
@@ -38,8 +25,33 @@ export const COMMAND_LIST_DATA = {
     description:
       "Elimina el proyecto actual: Culmina tus proyectos y libera tu espacio",
     usage: "/delete-project",
-    auxcall: (projectId) => {
-      console.log(`#DOM:INFO > Removed project with reference ${projectId}`);
+    auxcall: ({ projectId }) => {
+      consolInfo("#DOM:INFO", `Removed project with reference '${projectId}'`);
+    },
+  },
+
+  //..........//
+
+  "create-task": {
+    args: true,
+    description:
+      "Crea una nueva tarea: Define tus metas comenzando solo con un titulo",
+    usage: "/create-task [título]",
+    auxcall: (data) => {
+      consolInfo(
+        "#DOM:INFO",
+        `Append new task "${data.title}" with reference ${data.public_id}`,
+      );
+    },
+  },
+
+  "delete-task": {
+    args: true,
+    description:
+      "Eliminar una tarea concreta: Culmina tus tareas y libera tu proyecto",
+    usage: "/delete-task [id]",
+    auxcall: ({ taskId }) => {
+      consolInfo("#DOM:INFO", `Removed task with reference '${taskId}'`);
     },
   },
 
@@ -50,9 +62,6 @@ export const COMMAND_LIST_DATA = {
     description:
       "Crea una nueva columna Kanban: Estructura las etapas del flujo de trabajo para tus tareas",
     usage: "/create-kbcolumn [nombre]",
-    auxcall: ({ name, setKanbanData }) => {
-      console.log("Update DOM with kbcolumn: ", name, setKanbanData);
-    },
   },
 
   //..........//

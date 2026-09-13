@@ -5,7 +5,11 @@ import styles from "./LobbyPage.module.css";
 //====================//
 
 export default function LobbyPage() {
+  //..........//
+
   const navigate = useNavigate();
+
+  //..........//
 
   return (
     <>

@@ -9,8 +9,10 @@ const API_BASE_URL = "http://localhost:3001/api/dashboard/todo";
 const todoProjectAPI = {
   //..........//
 
-  fetchProjects: async ({ userId }) => {
-    const query = await axios.get(`${API_BASE_URL}/fetch-projects/${userId}`);
+  fetchProjects: async (data) => {
+    const query = await axios.get(
+      `${API_BASE_URL}/fetch-projects/${data.userId}`,
+    );
     return query.data;
   },
 

@@ -1,18 +1,22 @@
-import { useRef, useState } from "react";
+import { useState, useRef } from "react";
 
-import { COMMAND_LIST_DATA } from "./CommandListData";
+import { LuLoader } from "react-icons/lu";
 
+import { COMMAND_LIST_DATA } from "./commandListData";
 import styles from "./TodoInputLine.module.css";
 
 //====================//
 
-export default function TodoInputLine({ onCommand }) {
+export default function TodoInputLine({ onCommand, elementRef }) {
   //..........//
 
-  const entryRef = useRef(null);
   const [suggestList, setSuggestList] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [helpInfoElement, setHelpInfoElement] = useState(null);
+  const [executeIsLoading, setExecuteIsloading] = useState(false);
+
+  const entryRef = elementRef;
+  const listRef = useRef(null);
 
   //..........//
 
@@ -22,26 +26,37 @@ export default function TodoInputLine({ onCommand }) {
     let args = parts.slice(1).join(" ");
 
     if (COMMAND_LIST_DATA[name]) {
+      emptySuggestList();
+      setExecuteIsloading(true);
+      entryRef.current.disabled = true;
+
       if (name === "help") {
         args = {
           setHelpInfoElement,
           commandList: COMMAND_LIST_DATA,
-          entryRef,
           handleInputChange,
+          entryRef,
         };
       }
-      const execute = await onCommand(name, args);
-      if (execute) {
-        COMMAND_LIST_DATA[name].auxcall(execute);
-        entryRef.current.value = "";
-        setSuggestList([]);
-        setSelectedIndex(-1);
-      } else {
-        console.error(
-          `#DOM:INFO > [${name}] command does not have (handleCommand)`,
-        );
+
+      try {
+        const execute = await onCommand(name, args);
+
+        if (execute) {
+          COMMAND_LIST_DATA[name]?.auxcall?.(execute);
+          entryRef.current.value = "";
+          emptySuggestList();
+        }
+      } finally {
+        setExecuteIsloading(false);
+        entryRef.current.disabled = false;
       }
     }
+  };
+
+  const emptySuggestList = () => {
+    setSuggestList([]);
+    setSelectedIndex(-1);
   };
 
   //..........//
@@ -123,8 +138,7 @@ export default function TodoInputLine({ onCommand }) {
           return;
 
         case "Escape":
-          setSuggestList([]);
-          setSelectedIndex(-1);
+          emptySuggestList();
           return;
       }
     }
@@ -138,12 +152,22 @@ export default function TodoInputLine({ onCommand }) {
         type="text"
         placeholder="+ Añade una tarea [Enter] o escribe /help"
         ref={entryRef}
-        onChange={() => handleInputChange()}
+        onChange={handleInputChange}
+        onClick={handleInputChange}
         onKeyDown={handleKeyDown}
+        onBlur={() => {
+          setTimeout(() => {
+            if (listRef.current && entryRef.current !== document.activeElement)
+              emptySuggestList();
+          }, 100);
+        }}
+        onFocus={() => {
+          if (listRef.current) handleInputChange();
+        }}
       />
 
       {suggestList.length > 0 && (
-        <div className={styles.suggestBox}>
+        <div className={styles.suggestBox} ref={listRef}>
           {suggestList.map((suggestion, index) => (
             <div
               key={suggestion.command}
@@ -151,13 +175,13 @@ export default function TodoInputLine({ onCommand }) {
                 index === selectedIndex ? styles.selected : ""
               }`}
               onClick={() => {
-                entryRef.current.value = `/${suggestion.command} `;
                 entryRef.current.focus();
+                entryRef.current.value = `/${suggestion.command} `;
                 handleInputChange();
               }}
               onMouseEnter={(evnt) => {
-                if (evnt.target.dataset.index)
-                  setSelectedIndex(evnt.target.index);
+                const index = evnt.target.dataset.index;
+                if (index !== undefined) setSelectedIndex(Number(index));
               }}
               data-index={index}
             >
@@ -170,9 +194,16 @@ export default function TodoInputLine({ onCommand }) {
           ))}
         </div>
       )}
+
+      {executeIsLoading && (
+        <>
+          <p className={styles.itsLoading}>
+            <LuLoader /> &nbsp;&nbsp;Cargando...
+          </p>
+        </>
+      )}
+
       {helpInfoElement}
     </div>
   );
-
-  //..........//
 }

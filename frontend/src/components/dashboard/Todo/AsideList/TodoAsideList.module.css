@@ -1,8 +1,19 @@
 ul.asideList {
   border-right: 2px solid rgb(50, 50, 50);
   list-style-type: none;
+  flex: none;
   padding: 20px;
-  width: 250px;
+  width: 220px;
+  overflow: hidden auto;
+
+  &::-webkit-scrollbar {
+    display: block;
+    width: 7px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border: 2px solid rgb(50, 50, 50);
+    border-right: none;
+  }
 
   & > li {
     align-items: center;

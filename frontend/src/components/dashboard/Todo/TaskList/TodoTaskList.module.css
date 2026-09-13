@@ -5,9 +5,10 @@ ul.taskList {
   padding-top: 20px;
 
   & > li {
+    align-items: center;
     background-color: #e8e8e8;
     cursor: pointer;
-    display: block;
+    display: flex;
     padding: 10px 20px;
     width: 100%;
 

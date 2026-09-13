@@ -1,5 +1,5 @@
-import { isValidElement, useRef, useMemo, useEffect } from "react";
-import { useLocation, Navigate, useNavigate } from "react-router";
+import { isValidElement, useRef, useMemo } from "react";
+import { useLocation, Navigate, useSearchParams } from "react-router";
 
 import TodoAsideList from "@components/dashboard/Todo/AsideList/TodoAsideList";
 import TodoInputLine from "@components/dashboard/Todo/InputLine/TodoInputLine";
@@ -7,9 +7,9 @@ import TodoTaskList from "@components/dashboard/Todo/TaskList/TodoTaskList";
 import TodoKanbanView from "@components/dashboard/Todo/KanbanView/TodoKanbanView";
 import TodoTaskBoard from "@components/dashboard/Todo/TaskBoard/TodoTaskBoard";
 
-import { useTodoTask } from "@hooks/dashboard/Todo/useTask";
-import { useTodoProject } from "@hooks/dashboard/Todo/useProject";
-import { useTodoKanban } from "@hooks/dashboard/Todo/useKanban";
+import { useTodoTask } from "@hooks/dashboard/todo/useTask";
+import { useTodoProject } from "@hooks/dashboard/todo/useProject";
+import { useTodoKanban } from "@hooks/dashboard/todo/useKanban";
 
 import { DEFAULT_FILTER_ELEMENTS } from "./DefaultFilterElements";
 import commandHandler from "./commandHandler";
@@ -17,53 +17,70 @@ import styles from "./TodoPage.module.css";
 
 //====================//
 
-export default function TodoPage({ userId }) {
+export default function TodoPage() {
   //..........//
 
   const location = useLocation();
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const filterParam = new URLSearchParams(location.search).get("filter");
-  const projectParam = new URLSearchParams(location.search).get("project");
+  const filterParam = searchParams.get("filter");
+  const projectParam = searchParams.get("project");
+  const taskParam = searchParams.get("task");
 
   //..........//
 
-  const { tasksData, setTasksData, createTask } = useTodoTask({
-    userId,
-    projectParam,
-  });
-
-  const { projectsData, setProjectsData, createProject, deleteProject } =
-    useTodoProject({ userId });
-
-  const { kanbanData } = useTodoKanban();
+  const {
+    projectLoading,
+    projectError,
+    projectsData,
+    refreshProjects,
+    createProject,
+    deleteProject,
+  } = useTodoProject();
+  const {
+    taskLoading,
+    taskError,
+    tasksData,
+    refreshTasks,
+    createTask,
+    deleteTask,
+  } = useTodoTask();
+  const {
+    //kanbanLoading,
+    //kanbanError,
+    kanbanData,
+    // refreshKbcolumn,
+    createKbcolumn,
+    deleteKbcolumn,
+  } = useTodoKanban({ projectId: projectParam });
 
   //..........//
 
   const handleCommand = useMemo(
     () =>
       commandHandler({
-        setTasksData,
-        createTask,
-        //deleteTask,
-
-        setProjectsData,
         createProject,
         deleteProject,
 
-        navigate,
-        location,
+        createTask,
+        deleteTask,
+
+        createKbcolumn,
+        deleteKbcolumn,
+
+        projectParam,
       }),
     [
-      setTasksData,
-      createTask,
-
-      setProjectsData,
       createProject,
       deleteProject,
 
-      navigate,
-      location,
+      createTask,
+      deleteTask,
+
+      createKbcolumn,
+      deleteKbcolumn,
+
+      projectParam,
     ],
   );
 
@@ -72,34 +89,42 @@ export default function TodoPage({ userId }) {
     projectsData[projectParam]?.pname ||
     "(?) desconocido";
 
-  const taskBoardRef = useRef();
+  const taskBoardRef = useRef(null);
+  const inputLineRef = useRef(null);
 
   //..........//
 
-  useEffect(() => {
-    if (filterParam) setTasksData({});
-  }, [setTasksData, filterParam]);
-
-  //..........//
-
-  if (projectsData[projectParam] || isValidElement(currentFilter)) {
+  if (
+    !taskParam
+      ? projectsData[projectParam] || isValidElement(currentFilter)
+      : tasksData[taskParam]
+  ) {
     return (
       <>
         <TodoAsideList
-          location={location}
           defaultFilterElements={DEFAULT_FILTER_ELEMENTS}
           projectsData={projectsData}
+          refreshProjects={refreshProjects}
+          projectLoading={projectLoading}
+          projectError={projectError}
         />
         <div className={styles.todoPage}>
           <h1 className={styles.title}>{currentFilter}</h1>
-          <TodoInputLine onCommand={handleCommand} />
-          <TodoTaskList tasksData={tasksData} taskBoardRef={taskBoardRef} />
-          <TodoKanbanView kanbanData={kanbanData} />
-          <TodoTaskBoard elementRef={taskBoardRef} />
+          <TodoInputLine onCommand={handleCommand} elementRef={inputLineRef} />
+          <TodoTaskList
+            taskBoardRef={taskBoardRef}
+            tasksData={tasksData}
+            refreshTasks={refreshTasks}
+            taskLoading={taskLoading}
+            taskError={taskError}
+          />
+          <TodoTaskBoard
+            elementRef={taskBoardRef}
+            currentTask={tasksData[taskParam]}
+            inputLineRef={inputLineRef}
+          />
         </div>
       </>
     );
   } else return <Navigate to={location.pathname + "?filter=today"} replace />;
-
-  //..........//
 }

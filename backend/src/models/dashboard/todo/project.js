@@ -1,4 +1,5 @@
 import { query } from "#config/dbconn";
+
 import { generateProjectId } from "#utils/crypto";
 
 //====================//
@@ -8,13 +9,12 @@ class TodoProjectModel {
 
   async fetchProjects({ userId }) {
     const execute = await query(
-      `SELECT public_id, pname, created_at FROM projects WHERE user_id = '${userId}' ORDER BY table_id DESC`,
+      `SELECT * FROM projects WHERE user_id = '${userId}' ORDER BY table_id DESC`,
     );
-    const result = execute.rows;
     console.log(
       `#POSTGRES:SUCCESS > queried ${execute.rowCount} rows from [projects]`,
     );
-    return result;
+    return execute.rows;
   }
 
   async createProject({ userId, pname }) {
@@ -28,8 +28,7 @@ class TodoProjectModel {
     console.log(
       `#POSTGRES:SUCCESS > new row created in [projects] with public_id "${projectId}"`,
     );
-    const result = execute.rows[0];
-    return { projectId: result.public_id, createdAt: result.created_at };
+    return execute.rows[0];
   }
 
   async deleteProject({ userId, projectId }) {

@@ -1,13 +1,20 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
-import todoKanbanAPI from "@services/dashboard/Todo/useKanban";
+//import { useAuth } from "@context/AuthContext";
+
+import todoKanbanAPI from "@services/dashboard/todo/useKanban";
 
 //====================//
 
-export function useTodoKanban() {
+export function useTodoKanban({ projectId }) {
   //..........//
 
-  const [kanbanData, setKanbanData] = useState({});
+  //const { sessdata } = useAuth();
+  //const userId = sessdata?.userId;
+
+  const [kanbanData, setKanbanData] = useState({
+    empty: { tagname: "Sin columnas.." },
+  });
   const [kanbanLoading, setTaskLoading] = useState(false);
   const [kanbanError, setTaskError] = useState(null);
 
@@ -75,16 +82,25 @@ export function useTodoKanban() {
     }
   }, []);
 
+  const deleteKbcolumn = useCallback(async () => {
+    // ...
+  }, []);
+
+  //..........//
+
+  useEffect(() => {}, []);
+
   //..........//
 
   return {
-    kanbanData,
-    setKanbanData,
     kanbanLoading,
     kanbanError,
+
+    kanbanData,
+    setKanbanData,
+
     fetchKbcolumns,
     createKbcolumn,
+    deleteKbcolumn,
   };
-
-  //..........//
 }

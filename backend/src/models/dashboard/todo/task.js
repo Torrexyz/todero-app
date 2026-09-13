@@ -1,4 +1,5 @@
 import { query } from "#config/dbconn";
+
 import { generateTaskId } from "#utils/crypto";
 
 //====================//
@@ -6,36 +7,38 @@ import { generateTaskId } from "#utils/crypto";
 class TodoTaskModel {
   //..........//
 
-  async fetchTasks({ projectId }) {
+  async fetchTasks({ userId }) {
     const execute = await query(
-      `SELECT public_id, title, project_id, kbcolumn_id, created_at FROM tasks WHERE project_id = '${projectId}' ORDER BY table_id DESC`,
+      `SELECT * FROM tasks WHERE user_id = '${userId}' ORDER BY table_id DESC`,
     );
-    const result = execute.rows;
     console.log(
       `#POSTGRES:SUCCESS > queried ${execute.rowCount} rows from [tasks]`,
     );
-    return result;
+    return execute.rows;
   }
 
-  async createTask({ projectId, title }) {
+  async createTask({ userId, projectId, title }) {
     const taskId = generateTaskId();
     const execute = await query(
-      `INSERT INTO public.tasks(public_id, project_id, title)
-       VALUES ($1, $2, $3) 
+      `INSERT INTO public.tasks(public_id, user_id, project_id, title)
+       VALUES ($1, $2, $3, $4) 
        RETURNING *`,
-      [taskId, projectId, title],
+      [taskId, userId, projectId, title],
     );
     console.log(
       `#POSTGRES:SUCCESS > new row created in [tasks] with public_id "${taskId}"`,
     );
-    const result = execute.rows[0];
-    return {
-      taskId: result.public_id,
-      projectId: result.project_id,
-      kbcolumnId: result.kbcolumn_id,
-      taskId: result.public_id,
-      createdAt: result.created_at,
-    };
+    return execute.rows[0];
+  }
+
+  async deleteTask({ userId, taskId }) {
+    const execute = await query(
+      `DELETE FROM public.tasks WHERE public_id = '${taskId}' AND user_id = '${userId}'`,
+    );
+    console.log(
+      `#POSTGRES:SUCCESS > row deleted in [tasks] with public_id "${taskId}"`,
+    );
+    return execute.rowCount === 1;
   }
 
   //..........//

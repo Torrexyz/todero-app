@@ -1,18 +1,31 @@
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
+
+import { ImFilesEmpty } from "react-icons/im";
+import { VscBracketError } from "react-icons/vsc";
+import { MdOutlineCloudDownload } from "react-icons/md";
 
 import styles from "./TodoAsideList.module.css";
 
 //====================//
 
 export default function TodoAsideList({
-  location,
   defaultFilterElements,
   projectsData,
+  refreshProjects,
+  projectLoading,
+  projectError,
 }) {
+  //..........//
+
   const navigate = useNavigate();
+  const location = useLocation();
+
+  //..........//
 
   let skipEmptyProjects = false;
-  if (Object.keys(projectsData).length > 1) skipEmptyProjects = true;
+  if (Object.keys(projectsData).length === 0) skipEmptyProjects = true;
+
+  //..........//
 
   return (
     <>
@@ -33,23 +46,40 @@ export default function TodoAsideList({
           ),
         )}
         <hr />
-        {Object.entries(projectsData).map(([projectId, projectData]) => {
-          if (skipEmptyProjects ? projectId !== "empty" : true)
-            return (
-              <li
-                key={projectId}
-                onClick={() => {
-                  projectId !== "empty" &&
-                    navigate({
-                      pathname: location.pathname,
-                      search: "?project=" + projectId,
-                    });
-                }}
-              >
-                {projectData.pname}
+        {!projectError ? (
+          !projectLoading ? (
+            !skipEmptyProjects ? (
+              Object.entries(projectsData).map(([projectId, projectData]) => {
+                return (
+                  <li
+                    key={projectId}
+                    onClick={() => {
+                      projectId !== "empty" &&
+                        navigate({
+                          pathname: location.pathname,
+                          search: "?project=" + projectId,
+                        });
+                    }}
+                  >
+                    {projectData.pname}
+                  </li>
+                );
+              })
+            ) : (
+              <li>
+                <ImFilesEmpty /> &nbsp;&nbsp;Sin proyectos..
               </li>
-            );
-        })}
+            )
+          ) : (
+            <li>
+              <MdOutlineCloudDownload /> &nbsp;&nbsp;Cargando proyectos..
+            </li>
+          )
+        ) : (
+          <li onClick={() => refreshProjects(true)}>
+            <VscBracketError /> &nbsp;&nbsp;Error de carga
+          </li>
+        )}
       </ul>
     </>
   );

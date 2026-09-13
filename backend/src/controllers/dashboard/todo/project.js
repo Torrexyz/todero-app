@@ -11,7 +11,7 @@ class TodoProjectController {
     return userId === "usr_uymy3n7u676n";
   };
 
-  projectAuth = async (userId, projectId) => {
+  checkProject = async (userId, projectId) => {
     const execute = await query(
       `SELECT table_id FROM projects WHERE public_id = '${projectId}' AND user_id = '${userId}'`,
     );
@@ -97,7 +97,7 @@ class TodoProjectController {
           success: false,
           error: "{projectId}:string is required",
         });
-      } else if (!(await this.projectAuth(userId, projectId))) {
+      } else if (!(await this.checkProject(userId, projectId))) {
         return res.status(400).json({
           success: false,
           error: "{projectId} reference not found",

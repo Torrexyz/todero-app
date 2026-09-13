@@ -10,15 +10,6 @@ const router = Router();
 
 //====================//
 
-router.get("/fetch-tasks", (req, res, next) =>
-  TodoTaskController.fetchTasks(req, res, next),
-);
-router.post("/create-task", (req, res, next) =>
-  TodoTaskController.createTask(req, res, next),
-);
-
-//..........//
-
 router.get("/fetch-projects/:userId", (req, res, next) =>
   TodoProjectController.fetchProjects(req, res, next),
 );
@@ -27,6 +18,18 @@ router.post("/create-project", (req, res, next) =>
 );
 router.delete("/delete-project", (req, res, next) =>
   TodoProjectController.deleteProject(req, res, next),
+);
+
+//..........//
+
+router.get("/fetch-tasks/:userId", (req, res, next) =>
+  TodoTaskController.fetchTasks(req, res, next),
+);
+router.post("/create-task", (req, res, next) =>
+  TodoTaskController.createTask(req, res, next),
+);
+router.delete("/delete-task", (req, res, next) =>
+  TodoTaskController.deleteTask(req, res, next),
 );
 
 //..........//

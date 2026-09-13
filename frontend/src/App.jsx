@@ -32,7 +32,7 @@ export default function App() {
               element={<Navigate to="/dashboard/todo" replace />}
             ></Route>
 
-            <Route path="todo" element={<DashboardTodoPage userId="usr_uymy3n7u676n" />}></Route>
+            <Route path="todo" element={<DashboardTodoPage />}></Route>
             <Route path="notes" element={<DashboardNotesPage />}></Route>
             <Route path="clock" element={<DashboardClockPage />}></Route>
             <Route path="profile" element={<DashboardProfilePage />}></Route>

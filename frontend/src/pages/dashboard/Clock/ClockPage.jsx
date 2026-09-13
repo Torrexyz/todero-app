@@ -6,11 +6,17 @@ import styles from "./ClockPage.module.css";
 //====================//
 
 export default function ClockPage() {
+  //..........//
+
   const location = useLocation();
   const mode = new URLSearchParams(location.search).get("mode");
 
+  //..........//
+
   if (mode && !CLOCK_COMPONENTS[mode])
     return <Navigate to={location.pathname} replace />;
+
+  //..........//
 
   return (
     <>

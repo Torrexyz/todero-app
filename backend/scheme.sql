@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS kbcolumns (
 CREATE TABLE IF NOT EXISTS tasks (
     table_id SERIAL NOT NULL PRIMARY KEY,
     public_id VARCHAR(40) NOT NULL UNIQUE CHECK (public_id LIKE 'tsk_%'),
-    project_id VARCHAR(16) NOT NULL REFERENCES projects(public_id) ON DELETE CASCADE,
+    user_id VARCHAR(16) NOT NULL REFERENCES users(public_id) ON DELETE CASCADE,
+    project_id VARCHAR(16) NULL REFERENCES projects(public_id) ON DELETE CASCADE,
     kbcolumn_id VARCHAR(40) REFERENCES kbcolumns(public_id) ON DELETE SET NULL,
     title VARCHAR(150) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 );
 
 CREATE INDEX idx_projects_user_id ON projects(user_id);
-CREATE INDEX idx_kbcolumns_project_id ON kbcolumns(project_id);
+CREATE INDEX idx_tasks_user_id ON tasks(user_id);
 CREATE INDEX idx_tasks_project_id ON tasks(project_id);
 CREATE INDEX idx_tasks_kbcolumn_id ON tasks(kbcolumn_id);
+CREATE INDEX idx_kbcolumns_project_id ON kbcolumns(project_id);
