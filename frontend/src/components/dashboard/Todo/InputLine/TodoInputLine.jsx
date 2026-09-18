@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import { LuLoader } from "react-icons/lu";
 
@@ -13,14 +13,14 @@ export default function TodoInputLine({ onCommand, elementRef }) {
   const [suggestList, setSuggestList] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [helpInfoElement, setHelpInfoElement] = useState(null);
-  const [executeIsLoading, setExecuteIsloading] = useState(false);
 
+  const [executeIsLoading, setExecuteIsloading] = useState(false);
   const entryRef = elementRef;
   const listRef = useRef(null);
 
   //..........//
 
-  const executeCommand = async (string) => {
+  const executeCommand = async (string, auxcalls) => {
     const parts = string.trim().split(" ");
     const name = parts[0].slice(1);
     let args = parts.slice(1).join(" ");
@@ -42,14 +42,17 @@ export default function TodoInputLine({ onCommand, elementRef }) {
       try {
         const execute = await onCommand(name, args);
 
-        if (execute) {
-          COMMAND_LIST_DATA[name]?.auxcall?.(execute);
-          entryRef.current.value = "";
-          emptySuggestList();
-        }
+        COMMAND_LIST_DATA[name]?.auxcall?.(execute);
+        entryRef.current.value = "";
+        emptySuggestList();
+
+        auxcalls?.onSuccess?.();
+      } catch (err) {
+        auxcalls?.onError?.(err);
       } finally {
         setExecuteIsloading(false);
         entryRef.current.disabled = false;
+        auxcalls?.onFinished?.();
       }
     }
   };
@@ -93,14 +96,14 @@ export default function TodoInputLine({ onCommand, elementRef }) {
           setSelectedIndex((prev) =>
             prev < suggestList.length - 1 ? prev + 1 : 0,
           );
-          return;
+          break;
 
         case "ArrowUp":
           evnt.preventDefault();
           setSelectedIndex((prev) =>
             prev > 0 ? prev - 1 : suggestList.length - 1,
           );
-          return;
+          break;
 
         case "Tab":
           evnt.preventDefault();
@@ -108,7 +111,7 @@ export default function TodoInputLine({ onCommand, elementRef }) {
             entryRef.current.value = `/${suggestList[selectedIndex].command}${suggestList[selectedIndex].args ? " " : ""}`;
             handleInputChange();
           }
-          return;
+          break;
 
         case "Enter":
           evnt.preventDefault();
@@ -135,14 +138,27 @@ export default function TodoInputLine({ onCommand, elementRef }) {
             }
           }
           handleInputChange();
-          return;
+          break;
 
         case "Escape":
           emptySuggestList();
-          return;
+          break;
       }
+    } else if (evnt.key === "Enter") {
+      if (!evnt.target.value.startsWith("/") && evnt.target.value.length > 0)
+        executeCommand(`/create-task ${evnt.target.value}`);
     }
   };
+
+  //..........//
+
+  useEffect(() => {
+    if (entryRef.current) {
+      entryRef.current.executeCommand = (string, auxcalls) =>
+        executeCommand(string, auxcalls);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   //..........//
 

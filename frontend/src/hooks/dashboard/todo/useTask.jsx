@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router";
 
 import { useAuth } from "@context/AuthContext";
@@ -11,24 +11,31 @@ import { consolInfo, consolWarn, consolError } from "@utils/consol";
 
 //====================//
 
-export function useTodoTask() {
+export function useTodoTask({ autoFetch = false } = {}) {
   //..........//
 
   const { sessdata } = useAuth();
   const userId = sessdata?.userId;
 
+  //..........//
+
   const tasksData = useTaskStore((state) => state.tasks);
+  const taskLoading = useTaskStore((state) => state.loading);
+  const taskError = useTaskStore((state) => state.error);
+
   const setTasks = useTaskStore((state) => state.setTasks);
+  const setLoading = useTaskStore((state) => state.setLoading);
+  const setError = useTaskStore((state) => state.setError);
+  const setIsFetching = useTaskStore((state) => state.setIsFetching);
+
   const addTask = useTaskStore((state) => state.addTask);
   const removeTask = useTaskStore((state) => state.removeTask);
+  const modifyTask = useTaskStore((state) => state.modifyTask);
 
-  const [taskLoading, setTaskLoading] = useState(false);
-  const [taskError, setTaskError] = useState(null);
-
-  const isMounted = useRef(false);
-  const isFetching = useRef(false);
+  //..........//
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const isMounted = useRef(false);
 
   //..........//
 
@@ -36,19 +43,21 @@ export function useTodoTask() {
     async (force) => {
       if (!isMounted.current) return;
 
-      if (!force && useTaskStore.getState().loaded) {
+      const taskStore = useTaskStore.getState();
+
+      if (!force && taskStore.loaded) {
         consolWarn("#API:TASKS (FETCH)", "(CACHE) Data already loaded");
         return;
       }
 
-      if (isFetching.current) {
+      if (taskStore.isFetching) {
         consolWarn("#API:TASKS (FETCH)", "(ABORT) Previous fetch not finished");
         return;
       }
 
-      isFetching.current = true;
-      setTaskLoading(true);
-      setTaskError(null);
+      setIsFetching(true);
+      setLoading(true);
+      setError(null);
       consolInfo("#API:TASKS (FETCH)", "(PROCESS) Fetching data..");
 
       try {
@@ -63,23 +72,26 @@ export function useTodoTask() {
         if (isMounted.current) setTasks(data);
 
         consolInfo("#API:TASKS (FETCH)", "(SUCCESS) Data fetched");
-        return execute.success;
+        return execute;
       } catch (err) {
         consolError("#API:TASKS (FETCH)", err.message);
-        if (isMounted.current) setTaskError(err.message);
+        if (isMounted.current) setError(err.message);
+        throw err;
       } finally {
-        isFetching.current = false;
-        if (isMounted.current) setTaskLoading(false);
+        setIsFetching(false);
+        if (isMounted.current) setLoading(false);
       }
     },
-    [userId, setTasks],
+    [userId, setTasks, setLoading, setError, setIsFetching],
   );
 
   const createTask = useCallback(
     async (projectId, title) => {
       if (!isMounted.current) return;
 
-      if (isFetching.current) {
+      const taskStore = useTaskStore.getState();
+
+      if (taskStore.isFetching) {
         consolWarn(
           "#API:TASKS (CREATE)",
           "(ABORT) Previous fetch not finished",
@@ -87,9 +99,9 @@ export function useTodoTask() {
         return;
       }
 
-      isFetching.current = true;
-      setTaskLoading(true);
-      setTaskError(null);
+      setIsFetching(true);
+      setLoading(true);
+      setError(null);
       consolInfo("#API:TASKS (CREATE)", "(PROCESS) Creating task..");
 
       try {
@@ -100,26 +112,29 @@ export function useTodoTask() {
         });
 
         if (isMounted.current)
-          addTask({ id: execute.data.public_id, data: execute.data });
+          addTask(execute.data.public_id, execute.data);
 
         consolInfo("#API:TASKS (CREATE)", "(SUCCESS) Task created");
         return execute;
       } catch (err) {
         consolError("#API:TASKS (CREATE)", err.message);
-        if (isMounted.current) setTaskError(err.message);
+        if (isMounted.current) setError(err.message);
+        throw err;
       } finally {
-        isFetching.current = false;
-        if (isMounted.current) setTaskLoading(false);
+        setIsFetching(false);
+        if (isMounted.current) setLoading(false);
       }
     },
-    [userId, addTask],
+    [userId, addTask, setLoading, setError, setIsFetching],
   );
 
   const deleteTask = useCallback(
     async (taskId) => {
       if (!isMounted.current) return;
 
-      if (isFetching.current) {
+      const taskStore = useTaskStore.getState();
+
+      if (taskStore.isFetching) {
         consolWarn(
           "#API:TASKS (DELETE)",
           "(ABORT) Previous fetch not finished",
@@ -127,9 +142,9 @@ export function useTodoTask() {
         return;
       }
 
-      isFetching.current = true;
-      setTaskLoading(true);
-      setTaskError(null);
+      setIsFetching(true);
+      setLoading(true);
+      setError(null);
       consolInfo("#API:TASKS (DELETE)", "(PROCESS) Deleting task..");
 
       try {
@@ -145,22 +160,75 @@ export function useTodoTask() {
         return execute;
       } catch (err) {
         consolError("#API:TASKS (DELETE)", err.message);
-        if (isMounted.current) setTaskError(err.message);
+        if (isMounted.current) setError(err.message);
+        throw err;
       } finally {
-        isFetching.current = false;
-        if (isMounted.current) setTaskLoading(false);
+        setIsFetching(false);
+        if (isMounted.current) setLoading(false);
       }
     },
-    [userId, removeTask, searchParams, setSearchParams],
+    [
+      userId,
+      removeTask,
+      setLoading,
+      setError,
+      setIsFetching,
+      searchParams,
+      setSearchParams,
+    ],
+  );
+
+  const updateTask = useCallback(
+    async (taskId, column, value) => {
+      if (!isMounted.current) return;
+
+      const taskStore = useTaskStore.getState();
+
+      if (taskStore.isFetching) {
+        consolWarn(
+          "#API:TASKS (UPDATE)",
+          "(ABORT) Previous fetch not finished",
+        );
+        return;
+      }
+
+      setIsFetching(true);
+      consolInfo(
+        "#API:TASKS (UPDATE)",
+        `(PROCESS) Updating ${column} in task..`,
+      );
+
+      try {
+        const execute = await todoTaskAPI.updateTask({
+          userId,
+          taskId,
+          column,
+          value,
+        });
+
+        if (isMounted.current) modifyTask(execute.data.public_id, execute.data);
+
+        consolInfo("#API:TASKS (UPDATE)", `(SUCCESS) Task ${column} updated`);
+        return execute;
+      } catch (err) {
+        consolError("#API:TASKS (UPDATE)", err.message);
+        if (isMounted.current) setError(err.message);
+        throw err;
+      } finally {
+        setIsFetching(false);
+        if (isMounted.current) setLoading(false);
+      }
+    },
+    [userId, modifyTask, setLoading, setError, setIsFetching],
   );
 
   //..........//
 
   useEffect(() => {
     isMounted.current = true;
-    fetchTasks();
+    if (autoFetch && !useTaskStore.getState().loaded) fetchTasks();
     return () => (isMounted.current = false);
-  }, [fetchTasks]);
+  }, [fetchTasks, autoFetch]);
 
   //..........//
 
@@ -173,5 +241,6 @@ export function useTodoTask() {
     refreshTasks: () => fetchTasks(true),
     createTask,
     deleteTask,
+    updateTask,
   };
 }

@@ -1,5 +1,9 @@
 import { useSearchParams } from "react-router";
 
+import { useTaskStore } from "@store/dashboard/todo/taskStore";
+
+import { useTodoTask } from "@hooks/dashboard/todo/useTask";
+
 import { ImFileEmpty } from "react-icons/im";
 import { VscBracketError } from "react-icons/vsc";
 import { MdOutlineCloudDownload } from "react-icons/md";
@@ -8,18 +12,18 @@ import styles from "./TodoTaskList.module.css";
 
 //====================//
 
-export default function TodoTaskList({
-  taskBoardRef,
-  refreshTasks,
-  tasksData,
-  taskLoading,
-  taskError,
-}) {
+export default function TodoTaskList({ taskBoardRef }) {
   //..........//
 
   const [searchParams, setSearchParams] = useSearchParams();
 
   //..........//
+
+  const tasksData = useTaskStore((state) => state.tasks);
+  const taskLoading = useTaskStore((state) => state.loading);
+  const taskError = useTaskStore((state) => state.error);
+  
+  const { refreshTasks } = useTodoTask();
 
   const filteredTasks = Object.fromEntries(
     Object.entries(tasksData).filter(([, value]) => {

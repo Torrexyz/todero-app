@@ -1,86 +1,141 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef, useEffect } from "react";
 
-//import { useAuth } from "@context/AuthContext";
+import { useAuth } from "@context/AuthContext";
+
+import { useKanbanStore } from "@store/dashboard/todo/kanbanStore";
 
 import todoKanbanAPI from "@services/dashboard/todo/useKanban";
 
+import { consolInfo, consolWarn, consolError } from "@utils/consol";
+
 //====================//
 
-export function useTodoKanban({ projectId }) {
+export function useTodoKanban({ autoFetch = false, projectId } = {}) {
   //..........//
 
-  //const { sessdata } = useAuth();
-  //const userId = sessdata?.userId;
+  const { sessdata } = useAuth();
+  const userId = sessdata?.userId;
 
-  const [kanbanData, setKanbanData] = useState({
-    empty: { tagname: "Sin columnas.." },
-  });
-  const [kanbanLoading, setTaskLoading] = useState(false);
-  const [kanbanError, setTaskError] = useState(null);
+  //..........//
+
+  const kanbanData = useKanbanStore((state) => state.kbcolumns);
+  const kanbanLoading = useKanbanStore((state) => state.loading);
+  const kanbanError = useKanbanStore((state) => state.error);
+
+  const setKanban = useKanbanStore((state) => state.setKanban);
+  const setLoading = useKanbanStore((state) => state.setLoading);
+  const setError = useKanbanStore((state) => state.setError);
+  const setIsFetching = useKanbanStore((state) => state.setIsFetching);
+
+  const addKanban = useKanbanStore((state) => state.addKanban);
+  //const removeKanban = useKanbanStore((state) => state.removeKanban);
+  //const modifyKanban = useKanbanStore((state) => state.modifyKanban);
+
+  //..........//
 
   const isMounted = useRef(false);
-  const isFetching = useRef(false);
 
   //..........//
 
-  const fetchKbcolumns = useCallback(async () => {
-    if (!isMounted.current) return;
+  const fetchKbcolumns = useCallback(
+    async (force = false) => {
+      if (!isMounted.current) return;
 
-    if (isFetching.current) {
-      console.warn("#API:ABORT > Previous fetch not finished");
-      return;
-    } else {
-      console.info("#API:PROCESS > Fetching kbcolumns..");
-      isFetching.current = true;
-    }
+      const kanbanStore = useKanbanStore.getState();
 
-    try {
-      setTaskLoading(true);
-      setTaskError(null);
+      if (!force && kanbanStore.loaded) {
+        consolWarn("#API:KANBAN (FETCH)", "(CACHE) Data already loaded");
+        return;
+      }
 
-      const response = await todoKanbanAPI.fetchKbcolumns();
-      if (isMounted.current) setKanbanData(response.data);
+      if (kanbanStore.isFetching) {
+        consolWarn(
+          "#API:KANBAN (FETCH)",
+          "(ABORT) Previous fetch not finished",
+        );
+        return;
+      }
 
-      console.info("#API:SUCCESS > Kbcolumns fetched");
-      return response.data;
-    } catch (err) {
-      console.error("#API:ERROR > " + err.message);
-      if (isMounted.current) setTaskError(err.message);
-    } finally {
-      isFetching.current = false;
-      if (isMounted.current) setTaskLoading(false);
-    }
-  }, []);
+      setIsFetching(true);
+      setLoading(true);
+      setError(null);
+      consolInfo("#API:KANBAN (FETCH)", "(PROCESS) Fetching data..");
 
-  const createKbcolumn = useCallback(async (taskData) => {
-    if (!isMounted.current) return;
+      try {
+        const execute = await todoKanbanAPI.fetchKbcolumns({
+          userId,
+          projectId,
+        });
+        const data = {};
 
-    if (isFetching.current) {
-      console.warn("#API:ABORT > Previous fetch not finished");
-      return;
-    } else {
-      console.info("#API:PROCESS > Creating kbcolumn..");
-      isFetching.current = true;
-    }
+        execute.data.map((project) => {
+          data[project.public_id] = project;
+          delete data[project.public_id].public_id;
+        });
 
-    try {
-      setTaskLoading(true);
-      setTaskError(null);
+        if (isMounted.current) setKanban(data);
 
-      const newTask = await todoKanbanAPI.createKbcolumn(taskData);
-      if (isMounted.current)
-        setKanbanData((prev) => ({ ...prev, [newTask.id]: newTask }));
+        consolInfo("#API:KANBAN (FETCH)", "(SUCCESS) Data fetched");
+        return execute;
+      } catch (err) {
+        consolError("#API:KANBAN (FETCH)", err.message);
+        if (isMounted.current) setError(err.message);
+        throw err;
+      } finally {
+        setIsFetching(false);
+        if (isMounted.current) setLoading(false);
+      }
+    },
+    [userId, projectId, setKanban, setLoading, setError, setIsFetching],
+  );
 
-      console.info("#API:SUCCESS > Kbcolumn created");
-      return newTask;
-    } catch (err) {
-      console.error("#API:ERROR > " + err.message);
-      if (isMounted.current) setTaskError(err.message);
-    } finally {
-      isFetching.current = false;
-      if (isMounted.current) setTaskLoading(false);
-    }
-  }, []);
+  const createKbcolumn = useCallback(
+    async (kbname) => {
+      if (!isMounted.current) return;
+
+      const kanbanStore = useKanbanStore.getState();
+
+      if (kanbanStore.isFetching) {
+        consolWarn(
+          "#API:KANBAN (CREATE)",
+          "(ABORT) Previous fetch not finished",
+        );
+        return;
+      }
+
+      setIsFetching(true);
+      setLoading(true);
+      setError(null);
+      consolInfo("#API:KANBAN (CREATE)", "(PROCESS) Creating kbcolumn..");
+
+      try {
+        const execute = await todoKanbanAPI.createKbcolumn({
+          userId,
+          projectId,
+          kbname,
+        });
+        const data = {};
+
+        execute.data.map((project) => {
+          data[project.public_id] = project;
+          delete data[project.public_id].public_id;
+        });
+
+        if (isMounted.current) addKanban(data);
+
+        consolInfo("#API:KANBAN (CREATE)", "(SUCCESS) Kbcolumn created");
+        return execute;
+      } catch (err) {
+        consolError("#API:KANBAN (CREATE)", err.message);
+        if (isMounted.current) setError(err.message);
+        throw err;
+      } finally {
+        setIsFetching(false);
+        if (isMounted.current) setLoading(false);
+      }
+    },
+    [userId, projectId, addKanban, setLoading, setError, setIsFetching],
+  );
 
   const deleteKbcolumn = useCallback(async () => {
     // ...
@@ -88,7 +143,11 @@ export function useTodoKanban({ projectId }) {
 
   //..........//
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    isMounted.current = true;
+    if (autoFetch && !useKanbanStore.getState()) fetchKbcolumns();
+    return () => (isMounted.current = false);
+  }, [autoFetch, fetchKbcolumns]);
 
   //..........//
 
@@ -97,7 +156,6 @@ export function useTodoKanban({ projectId }) {
     kanbanError,
 
     kanbanData,
-    setKanbanData,
 
     fetchKbcolumns,
     createKbcolumn,

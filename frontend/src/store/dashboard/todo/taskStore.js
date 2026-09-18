@@ -2,18 +2,31 @@ import { create } from "zustand";
 
 //====================//
 
-export const useTaskStore = create((set) => ({
+export const useTaskStore = create((set, get) => ({
   //..........//
 
   tasks: {},
   loaded: false,
+  loading: false,
+  error: null,
+  isFetching: false,
 
   //..........//
 
   setTasks: (tasks) => set(() => ({ tasks, loaded: true })),
 
-  addTask: ({ id, data }) =>
-    set((state) => ({ tasks: { ...state.tasks, [id]: data } })),
+  setLoading: (loading) => set({ loading }),
+
+  setError: (error) => set({ error }),
+
+  setIsFetching: (isFetching) => set({ isFetching }),
+
+  //..........//
+
+  addTask: (id, data) =>
+    set((state) => ({
+      tasks: { ...state.tasks, [id]: data },
+    })),
 
   removeTask: (id) =>
     set((state) => {
@@ -22,7 +35,23 @@ export const useTaskStore = create((set) => ({
       return { tasks: newTasks };
     }),
 
-  clearAll: () => set({ tasks: {}, loaded: false }),
+  modifyTask: (id, data) =>
+    set((state) => ({
+      tasks: { ...state.tasks, [id]: { ...state.tasks[id], ...data } },
+    })),
+
+  //..........//
+
+  clearAll: () =>
+    set({
+      tasks: {},
+      loaded: false,
+      loading: false,
+      error: null,
+      isFetching: false,
+    }),
+
+  getState: () => get(),
 
   //..........//
 }));

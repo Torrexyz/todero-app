@@ -31,12 +31,22 @@ class TodoTaskModel {
     return execute.rows[0];
   }
 
-  async deleteTask({ userId, taskId }) {
+  async deleteTask({ taskId }) {
     const execute = await query(
-      `DELETE FROM public.tasks WHERE public_id = '${taskId}' AND user_id = '${userId}'`,
+      `DELETE FROM public.tasks WHERE public_id = '${taskId}'`,
     );
     console.log(
       `#POSTGRES:SUCCESS > row deleted in [tasks] with public_id "${taskId}"`,
+    );
+    return execute.rowCount === 1;
+  }
+
+  async updateTask({ taskId, column, value }) {
+    const execute = await query(
+      `UPDATE public.tasks SET ${column} = ${typeof value === "string" ? `'${value}'` : value}, edited_at = CURRENT_TIMESTAMP  WHERE public_id = '${taskId}'`,
+    );
+    console.log(
+      `#POSTGRES:SUCCESS > row updated in [tasks] with public_id "${taskId}"`,
     );
     return execute.rowCount === 1;
   }

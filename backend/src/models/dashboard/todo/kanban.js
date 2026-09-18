@@ -7,7 +7,7 @@ import { generateKbcId } from "#utils/crypto";
 class TodoKanbanModel {
   //..........//
 
-  async getAll({ userId, projectId }) {
+  async fetchKanban({ userId, projectId }) {
     const result = await query(
       `SELECT * FROM kanban WHERE user_id = '${userId}' AND project_id = '${projectId}' ORDER BY id DESC`,
     );
@@ -16,6 +16,10 @@ class TodoKanbanModel {
   }
 
   async createKbcolumn({}) {
+    return false;
+  }
+
+  async deleteKbcolumn({}) {
     return false;
   }
 

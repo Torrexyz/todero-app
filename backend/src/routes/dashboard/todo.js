@@ -31,6 +31,9 @@ router.post("/create-task", (req, res, next) =>
 router.delete("/delete-task", (req, res, next) =>
   TodoTaskController.deleteTask(req, res, next),
 );
+router.patch("/update-task", (req, res, next) =>
+  TodoTaskController.updateTask(req, res, next),
+);
 
 //..........//
 

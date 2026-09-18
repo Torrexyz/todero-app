@@ -18,6 +18,14 @@
   --dashboard-layaout-width: 80%;
 }
 
+::-webkit-scrollbar {
+  display: block;
+  width: 7px;
+}
+::-webkit-scrollbar-thumb {
+  border: 2px solid rgb(50, 50, 50);
+}
+
 body {
   background-color: var(--main-bgcolor);
 }

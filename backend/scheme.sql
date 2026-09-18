@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS tasks (
     edited_at TIMESTAMPTZ,
     expires_at TIMESTAMPTZ,
     is_checked BOOLEAN NOT NULL DEFAULT false
+    descriptor character varying(1000) COLLATE pg_catalog."default",
+    sublist json,
 );
 
 CREATE INDEX idx_projects_user_id ON projects(user_id);

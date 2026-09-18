@@ -2,26 +2,56 @@ import { create } from "zustand";
 
 //====================//
 
-export const useKanbanStore = create((set) => ({
+export const useKanbanStore = create((set, get) => ({
   //..........//
 
   kanban: {},
+  loaded: false,
+  loading: false,
+  error: null,
+  isFetching: false,
 
   //..........//
 
-  setProjects: (kanban) => set(() => ({ kanban })),
+  setKbcolumns: (kanban) => set(() => ({ kanban, loaded: true })),
 
-  addProject: (kanban) =>
-    set((state) => ({ kanban: { ...state.projects, [kanban.id]: kanban } })),
+  setLoading: (loading) => set({ loading }),
 
-  removeProject: (id) =>
+  setError: (error) => set({ error }),
+
+  setIsFetching: (isFetching) => set({ isFetching }),
+
+  //..........//
+
+  addKbcolumn: (id, data) =>
+    set((state) => ({
+      kanban: { ...state.kanban, [id]: data },
+    })),
+
+  removeKbcolumn: (id) =>
     set((state) => {
       const newKanban = { ...state.kanban };
       delete newKanban[id];
       return { kanban: newKanban };
     }),
 
-  clear: () => set({ kanban: {} }),
+  modifyKanban: (id, data) =>
+    set((state) => ({
+      kanban: { ...state.kanban, [id]: { ...state.kanban[id], ...data } },
+    })),
+
+  //..........//
+
+  clearAll: () =>
+    set({
+      kanban: {},
+      loaded: false,
+      loading: false,
+      error: null,
+      isFetching: false,
+    }),
+
+  getState: () => get(),
 
   //..........//
 }));

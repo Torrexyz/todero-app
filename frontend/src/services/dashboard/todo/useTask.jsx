@@ -26,6 +26,11 @@ const todoTaskAPI = {
     return query.data;
   },
 
+  updateTask: async (data) => {
+    const query = await axios.patch(`${API_BASE_URL}/update-task`, data);
+    return query.data;
+  },
+
   //..........//
 };
 

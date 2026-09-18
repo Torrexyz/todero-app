@@ -1,5 +1,9 @@
 import { useLocation, useNavigate } from "react-router";
 
+import { useProjectStore } from "@store/dashboard/todo/projectStore";
+
+import { useTodoProject } from "@hooks/dashboard/todo/useProject";
+
 import { ImFilesEmpty } from "react-icons/im";
 import { VscBracketError } from "react-icons/vsc";
 import { MdOutlineCloudDownload } from "react-icons/md";
@@ -8,19 +12,19 @@ import styles from "./TodoAsideList.module.css";
 
 //====================//
 
-export default function TodoAsideList({
-  defaultFilterElements,
-  projectsData,
-  refreshProjects,
-  projectLoading,
-  projectError,
-}) {
+export default function TodoAsideList({ defaultFilterElements }) {
   //..........//
 
   const navigate = useNavigate();
   const location = useLocation();
 
   //..........//
+
+  const projectsData = useProjectStore((state) => state.projects);
+  const projectLoading = useProjectStore((state) => state.loading);
+  const projectError = useProjectStore((state) => state.error);
+  
+  const { refreshProjects } = useTodoProject({ autoFetch: false });
 
   let skipEmptyProjects = false;
   if (Object.keys(projectsData).length === 0) skipEmptyProjects = true;
