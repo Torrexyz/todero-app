@@ -37,7 +37,10 @@ export const useProjectStore = create((set, get) => ({
 
   modifyProject: (id, data) =>
     set((state) => ({
-      projects: { ...state.projects, [id]: { ...state.projects[id], ...data } },
+      projects: {
+        ...state.projects,
+        [id]: { ...state.projects[id], ...data },
+      },
     })),
 
   //..........//

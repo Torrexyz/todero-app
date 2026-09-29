@@ -1,9 +1,7 @@
 import { useCallback, useRef, useEffect } from "react";
 
 import { useAuth } from "@context/AuthContext";
-
 import { useKanbanStore } from "@store/dashboard/todo/kanbanStore";
-
 import todoKanbanAPI from "@services/dashboard/todo/useKanban";
 
 import { consolInfo, consolWarn, consolError } from "@utils/consol";
@@ -27,9 +25,9 @@ export function useTodoKanban({ autoFetch = false, projectId } = {}) {
   const setError = useKanbanStore((state) => state.setError);
   const setIsFetching = useKanbanStore((state) => state.setIsFetching);
 
-  const addKanban = useKanbanStore((state) => state.addKanban);
-  //const removeKanban = useKanbanStore((state) => state.removeKanban);
-  //const modifyKanban = useKanbanStore((state) => state.modifyKanban);
+  const addKbcolumn = useKanbanStore((state) => state.addKbcolumn);
+  //const removeKbcolumn = useKanbanStore((state) => state.removeKbcolumn);
+  //const modifyKbcolumn = useKanbanStore((state) => state.modifyKbcolumn);
 
   //..........//
 
@@ -93,6 +91,7 @@ export function useTodoKanban({ autoFetch = false, projectId } = {}) {
     async (kbname) => {
       if (!isMounted.current) return;
 
+      /*
       const kanbanStore = useKanbanStore.getState();
 
       if (kanbanStore.isFetching) {
@@ -106,6 +105,7 @@ export function useTodoKanban({ autoFetch = false, projectId } = {}) {
       setIsFetching(true);
       setLoading(true);
       setError(null);
+      */
       consolInfo("#API:KANBAN (CREATE)", "(PROCESS) Creating kbcolumn..");
 
       try {
@@ -121,20 +121,21 @@ export function useTodoKanban({ autoFetch = false, projectId } = {}) {
           delete data[project.public_id].public_id;
         });
 
-        if (isMounted.current) addKanban(data);
+        if (isMounted.current) addKbcolumn(data);
 
         consolInfo("#API:KANBAN (CREATE)", "(SUCCESS) Kbcolumn created");
         return execute;
+        // eslint-disable-next-line no-useless-catch
       } catch (err) {
-        consolError("#API:KANBAN (CREATE)", err.message);
-        if (isMounted.current) setError(err.message);
+        //consolError("#API:KANBAN (CREATE)", err.message);
+        //if (isMounted.current) setError(err.message);
         throw err;
       } finally {
-        setIsFetching(false);
-        if (isMounted.current) setLoading(false);
+        //setIsFetching(false);
+        //if (isMounted.current) setLoading(false);
       }
     },
-    [userId, projectId, addKanban, setLoading, setError, setIsFetching],
+    [userId, projectId, addKbcolumn],
   );
 
   const deleteKbcolumn = useCallback(async () => {

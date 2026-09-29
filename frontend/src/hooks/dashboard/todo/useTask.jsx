@@ -2,9 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router";
 
 import { useAuth } from "@context/AuthContext";
-
 import { useTaskStore } from "@store/dashboard/todo/taskStore";
-
 import todoTaskAPI from "@services/dashboard/todo/useTask";
 
 import { consolInfo, consolWarn, consolError } from "@utils/consol";
@@ -89,6 +87,7 @@ export function useTodoTask({ autoFetch = false } = {}) {
     async (projectId, title) => {
       if (!isMounted.current) return;
 
+      /*
       const taskStore = useTaskStore.getState();
 
       if (taskStore.isFetching) {
@@ -102,6 +101,7 @@ export function useTodoTask({ autoFetch = false } = {}) {
       setIsFetching(true);
       setLoading(true);
       setError(null);
+      */
       consolInfo("#API:TASKS (CREATE)", "(PROCESS) Creating task..");
 
       try {
@@ -111,27 +111,28 @@ export function useTodoTask({ autoFetch = false } = {}) {
           title,
         });
 
-        if (isMounted.current)
-          addTask(execute.data.public_id, execute.data);
+        if (isMounted.current) addTask(execute.data.public_id, execute.data);
 
         consolInfo("#API:TASKS (CREATE)", "(SUCCESS) Task created");
         return execute;
+        // eslint-disable-next-line no-useless-catch
       } catch (err) {
-        consolError("#API:TASKS (CREATE)", err.message);
-        if (isMounted.current) setError(err.message);
+        //consolError("#API:TASKS (CREATE)", err.message);
+        //if (isMounted.current) setError(err.message);
         throw err;
       } finally {
-        setIsFetching(false);
-        if (isMounted.current) setLoading(false);
+        //setIsFetching(false);
+        //if (isMounted.current) setLoading(false);
       }
     },
-    [userId, addTask, setLoading, setError, setIsFetching],
+    [userId, addTask],
   );
 
   const deleteTask = useCallback(
     async (taskId) => {
       if (!isMounted.current) return;
 
+      /*
       const taskStore = useTaskStore.getState();
 
       if (taskStore.isFetching) {
@@ -145,6 +146,7 @@ export function useTodoTask({ autoFetch = false } = {}) {
       setIsFetching(true);
       setLoading(true);
       setError(null);
+      */
       consolInfo("#API:TASKS (DELETE)", "(PROCESS) Deleting task..");
 
       try {
@@ -158,30 +160,24 @@ export function useTodoTask({ autoFetch = false } = {}) {
 
         consolInfo("#API:TASKS (DELETE)", "(SUCCESS) Task deleted");
         return execute;
+        // eslint-disable-next-line no-useless-catch
       } catch (err) {
-        consolError("#API:TASKS (DELETE)", err.message);
-        if (isMounted.current) setError(err.message);
+        //consolError("#API:TASKS (DELETE)", err.message);
+        //if (isMounted.current) setError(err.message);
         throw err;
       } finally {
-        setIsFetching(false);
-        if (isMounted.current) setLoading(false);
+        //setIsFetching(false);
+        //if (isMounted.current) setLoading(false);
       }
     },
-    [
-      userId,
-      removeTask,
-      setLoading,
-      setError,
-      setIsFetching,
-      searchParams,
-      setSearchParams,
-    ],
+    [userId, removeTask, searchParams, setSearchParams],
   );
 
   const updateTask = useCallback(
     async (taskId, column, value) => {
       if (!isMounted.current) return;
 
+      /*
       const taskStore = useTaskStore.getState();
 
       if (taskStore.isFetching) {
@@ -193,6 +189,8 @@ export function useTodoTask({ autoFetch = false } = {}) {
       }
 
       setIsFetching(true);
+      */
+
       consolInfo(
         "#API:TASKS (UPDATE)",
         `(PROCESS) Updating ${column} in task..`,
@@ -210,16 +208,17 @@ export function useTodoTask({ autoFetch = false } = {}) {
 
         consolInfo("#API:TASKS (UPDATE)", `(SUCCESS) Task ${column} updated`);
         return execute;
+        // eslint-disable-next-line no-useless-catch
       } catch (err) {
-        consolError("#API:TASKS (UPDATE)", err.message);
-        if (isMounted.current) setError(err.message);
+        //consolError("#API:TASKS (UPDATE)", err.message);
+        //if (isMounted.current) setError(err.message);
         throw err;
       } finally {
-        setIsFetching(false);
-        if (isMounted.current) setLoading(false);
+        //setIsFetching(false);
+        //if (isMounted.current) setLoading(false);
       }
     },
-    [userId, modifyTask, setLoading, setError, setIsFetching],
+    [userId, modifyTask],
   );
 
   //..........//

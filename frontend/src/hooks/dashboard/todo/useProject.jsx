@@ -2,9 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 
 import { useAuth } from "@context/AuthContext";
-
 import { useProjectStore } from "@store/dashboard/todo/projectStore";
-
 import todoProjectAPI from "@services/dashboard/todo/useProject";
 
 import { consolInfo, consolWarn, consolError } from "@utils/consol";
@@ -92,6 +90,7 @@ export function useTodoProject({ autoFetch = false } = {}) {
     async (pname) => {
       if (!isMounted.current) return;
 
+      /*
       const projectStore = useProjectStore.getState();
 
       if (projectStore.isFetching) {
@@ -105,6 +104,7 @@ export function useTodoProject({ autoFetch = false } = {}) {
       setIsFetching(true);
       setLoading(true);
       setError(null);
+      */
       consolInfo("#API:PROJECTS (CREATE)", "(PROCESS) Creating project..");
 
       try {
@@ -120,22 +120,24 @@ export function useTodoProject({ autoFetch = false } = {}) {
 
         consolInfo("#API:PROJECTS (CREATE)", "(SUCCESS) Project created");
         return execute;
+        // eslint-disable-next-line no-useless-catch
       } catch (err) {
-        consolError("#API:PROJECTS (CREATE)", err.message);
-        if (isMounted.current) setError(err.message);
+        //consolError("#API:PROJECTS (CREATE)", err.message);
+        //if (isMounted.current) setError(err.message);
         throw err;
       } finally {
-        setIsFetching(false);
-        if (isMounted.current) setLoading(false);
+        //setIsFetching(false);
+        //if (isMounted.current) setLoading(false);
       }
     },
-    [userId, addProject, setLoading, setError, setIsFetching, navigate],
+    [userId, addProject, navigate],
   );
 
   const deleteProject = useCallback(
     async (projectId) => {
       if (!isMounted.current) return;
 
+      /*
       const projectStore = useProjectStore.getState();
 
       if (projectStore.isFetching) {
@@ -149,6 +151,8 @@ export function useTodoProject({ autoFetch = false } = {}) {
       setIsFetching(true);
       setLoading(true);
       setError(null);
+      */
+
       consolInfo("#API:PROJECTS (DELETE)", "(PROCESS) Deleting project..");
 
       try {
@@ -168,16 +172,17 @@ export function useTodoProject({ autoFetch = false } = {}) {
 
         consolInfo("#API:PROJECTS (DELETE)", "(SUCCESS) Project deleted");
         return execute;
+        // eslint-disable-next-line no-useless-catch
       } catch (err) {
-        consolError("#API:PROJECTS (DELETE)", err.message);
-        if (isMounted.current) setError(err.message);
+        //consolError("#API:PROJECTS (DELETE)", err.message);
+        //if (isMounted.current) setError(err.message);
         throw err;
       } finally {
-        setIsFetching(false);
-        if (isMounted.current) setLoading(false);
+        //setIsFetching(false);
+        //if (isMounted.current) setLoading(false);
       }
     },
-    [userId, removeProject, setLoading, setError, setIsFetching, navigate],
+    [userId, removeProject, navigate],
   );
 
   //..........//

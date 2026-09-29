@@ -1,5 +1,3 @@
-import { query } from "#config/dbconn";
-
 import TodoProjectModel from "#models/dashboard/todo/project";
 
 import TodoAuthController from "./auths.js";

@@ -5,7 +5,7 @@ import { create } from "zustand";
 export const useKanbanStore = create((set, get) => ({
   //..........//
 
-  kanban: {},
+  kbcolumns: {},
   loaded: false,
   loading: false,
   error: null,
@@ -13,7 +13,7 @@ export const useKanbanStore = create((set, get) => ({
 
   //..........//
 
-  setKbcolumns: (kanban) => set(() => ({ kanban, loaded: true })),
+  setKbcolumns: (kbcolumns) => set(() => ({ kbcolumns, loaded: true })),
 
   setLoading: (loading) => set({ loading }),
 
@@ -25,26 +25,29 @@ export const useKanbanStore = create((set, get) => ({
 
   addKbcolumn: (id, data) =>
     set((state) => ({
-      kanban: { ...state.kanban, [id]: data },
+      kbcolumns: { ...state.kbcolumns, [id]: data },
     })),
 
   removeKbcolumn: (id) =>
     set((state) => {
-      const newKanban = { ...state.kanban };
+      const newKanban = { ...state.kbcolumns };
       delete newKanban[id];
-      return { kanban: newKanban };
+      return { kbcolumns: newKanban };
     }),
 
-  modifyKanban: (id, data) =>
+  modifyKbcolumn: (id, data) =>
     set((state) => ({
-      kanban: { ...state.kanban, [id]: { ...state.kanban[id], ...data } },
+      kbcolumns: {
+        ...state.kbcolumns,
+        [id]: { ...state.kbcolumns[id], ...data },
+      },
     })),
 
   //..........//
 
   clearAll: () =>
     set({
-      kanban: {},
+      kbcolumns: {},
       loaded: false,
       loading: false,
       error: null,

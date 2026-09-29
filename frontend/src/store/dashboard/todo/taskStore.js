@@ -37,7 +37,10 @@ export const useTaskStore = create((set, get) => ({
 
   modifyTask: (id, data) =>
     set((state) => ({
-      tasks: { ...state.tasks, [id]: { ...state.tasks[id], ...data } },
+      tasks: {
+        ...state.tasks,
+        [id]: { ...state.tasks[id], ...data },
+      },
     })),
 
   //..........//

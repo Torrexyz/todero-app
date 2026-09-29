@@ -8,6 +8,7 @@ const createCuid = initCUID({ length: 12 });
 
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
 const generateNanoId = customAlphabet(alphabet, 12);
 
 //====================//

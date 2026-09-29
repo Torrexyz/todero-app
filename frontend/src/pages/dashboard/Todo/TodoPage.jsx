@@ -4,7 +4,7 @@ import { useLocation, Navigate, useSearchParams } from "react-router";
 import TodoAsideList from "@components/dashboard/Todo/AsideList/TodoAsideList";
 import TodoInputLine from "@components/dashboard/Todo/InputLine/TodoInputLine";
 import TodoTaskList from "@components/dashboard/Todo/TaskList/TodoTaskList";
-//import TodoKanbanView from "@components/dashboard/Todo/KanbanView/TodoKanbanView";
+import TodoKanbanView from "@components/dashboard/Todo/KanbanView/TodoKanbanView";
 import TodoTaskBoard from "@components/dashboard/Todo/TaskBoard/TodoTaskBoard";
 
 import { useTodoTask } from "@hooks/dashboard/todo/useTask";
@@ -81,8 +81,6 @@ export default function TodoPage() {
     projectsData[projectParam]?.pname ||
     "(?) desconocido";
 
-  //..........//
-
   const taskBoardRef = useRef(null);
   const inputLineRef = useRef(null);
 
@@ -96,14 +94,23 @@ export default function TodoPage() {
     return (
       <>
         <TodoAsideList defaultFilterElements={DEFAULT_FILTER_ELEMENTS} />
+
         <div className={styles.todoPage}>
           <h1 className={styles.title}>{currentFilter}</h1>
+
           <TodoInputLine onCommand={handleCommand} elementRef={inputLineRef} />
-          <TodoTaskList taskBoardRef={taskBoardRef} />
+
+          <TodoTaskList
+            taskBoardRef={taskBoardRef}
+            inputLineRef={inputLineRef}
+          />
+          <TodoKanbanView />
+
           <TodoTaskBoard
             elementRef={taskBoardRef}
             currentTask={tasksData[taskParam]}
             inputLineRef={inputLineRef}
+            onCommand={handleCommand}
           />
         </div>
       </>

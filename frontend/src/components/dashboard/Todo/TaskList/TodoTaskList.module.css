@@ -19,5 +19,17 @@ ul.taskList {
     &:last-of-type {
       margin-bottom: 30px;
     }
+
+    & > input[type="checkbox"] {
+      accent-color: #b9b9b9;
+      border: none;
+      margin-right: 10px;
+      height: 18px;
+      width: 18px;
+
+      &:hover {
+        accent-color: #b1b1b1;
+      }
+    }
   }
 }

@@ -30,13 +30,13 @@ CREATE TABLE IF NOT EXISTS tasks (
     user_id VARCHAR(16) NOT NULL REFERENCES users(public_id) ON DELETE CASCADE,
     project_id VARCHAR(16) NULL REFERENCES projects(public_id) ON DELETE CASCADE,
     kbcolumn_id VARCHAR(40) REFERENCES kbcolumns(public_id) ON DELETE SET NULL,
-    title VARCHAR(150) NOT NULL,
+    title VARCHAR(100) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     edited_at TIMESTAMPTZ,
     expires_at TIMESTAMPTZ,
-    is_checked BOOLEAN NOT NULL DEFAULT false
-    descriptor character varying(1000) COLLATE pg_catalog."default",
-    sublist json,
+    is_checked BOOLEAN NOT NULL DEFAULT false,
+    descriptor VARCHAR(500) NULL,
+    sublist JSON,
 );
 
 CREATE INDEX idx_projects_user_id ON projects(user_id);

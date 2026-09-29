@@ -61,7 +61,26 @@ export default function commandHandler({
           const [, taskId, column, value] = args.match(
             /^\s*(\S+)\s+(\S+)\s+(.*)$/s,
           );
-          const query = await updateTask(taskId, column.substr(1), value);
+
+          const typeCastingValue = (() => {
+            switch (true) {
+              case value === "null":
+                return null;
+              case ["true", "false"].includes(value):
+                return value === "true" ? true : false;
+              case isFinite(value):
+                return Number(value);
+              default:
+                return value;
+            }
+          })();
+
+          const query = await updateTask(
+            taskId,
+            column.substr(1),
+            typeCastingValue,
+          );
+
           return query.success ? query.data : null;
         } catch (err) {
           throw err;

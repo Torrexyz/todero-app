@@ -1,7 +1,6 @@
 import { useSearchParams } from "react-router";
 
 import { useTaskStore } from "@store/dashboard/todo/taskStore";
-
 import { useTodoTask } from "@hooks/dashboard/todo/useTask";
 
 import { ImFileEmpty } from "react-icons/im";
@@ -12,18 +11,18 @@ import styles from "./TodoTaskList.module.css";
 
 //====================//
 
-export default function TodoTaskList({ taskBoardRef }) {
-  //..........//
-
-  const [searchParams, setSearchParams] = useSearchParams();
-
+export default function TodoTaskList({ taskBoardRef, inputLineRef }) {
   //..........//
 
   const tasksData = useTaskStore((state) => state.tasks);
   const taskLoading = useTaskStore((state) => state.loading);
   const taskError = useTaskStore((state) => state.error);
-  
+
   const { refreshTasks } = useTodoTask();
+
+  //..........//
+
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const filteredTasks = Object.fromEntries(
     Object.entries(tasksData).filter(([, value]) => {
@@ -58,6 +57,24 @@ export default function TodoTaskList({ taskBoardRef }) {
                           "translateX(0%)");
                     }}
                   >
+                    <input
+                      type="checkbox"
+                      defaultChecked={taskData.is_checked}
+                      onClick={(evnt) => {
+                        evnt.stopPropagation();
+                        evnt.target.disabled = true;
+                        inputLineRef.current.executeCommand(
+                          `/set-task ${taskId} @is_checked ${evnt.target.checked}`,
+                          {
+                            onError: () =>
+                              alert(
+                                "¡Oops! Ocurrió un error al intentar actualizar el estado de la tarea.",
+                              ),
+                            onFinished: () => (evnt.target.disabled = false),
+                          },
+                        );
+                      }}
+                    />
                     <p>{taskData.title}</p>
                   </li>
                 );

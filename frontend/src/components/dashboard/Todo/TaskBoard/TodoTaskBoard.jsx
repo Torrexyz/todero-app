@@ -1,14 +1,24 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router";
 
 import { useProjectStore } from "@store/dashboard/todo/projectStore";
+
+import DatePicker from "react-datepicker";
+import { es } from "date-fns/locale";
+import "react-datepicker/dist/react-datepicker.css";
 
 import { VscCloseAll } from "react-icons/vsc";
 import { AiTwotoneDelete } from "react-icons/ai";
 import { FaPlus } from "react-icons/fa6";
 import { MdModeEdit, MdError } from "react-icons/md";
+import { TbWashDrycleanOff } from "react-icons/tb";
+import { FaRegSave } from "react-icons/fa";
+import { PiEmptyLight } from "react-icons/pi";
 
+import useHandleActions from "./useHandleActions";
+import { useSublistData } from "./useSublistData";
 import styles from "./TodoTaskBoard.module.css";
+import "./datePicker.css";
 
 //====================//
 
@@ -16,6 +26,7 @@ export default function TodoTaskBoard({
   elementRef,
   currentTask,
   inputLineRef,
+  onCommand,
 }) {
   //..........//
 
@@ -23,212 +34,362 @@ export default function TodoTaskBoard({
   const taskParam = searchParams.get("task");
 
   const projectsData = useProjectStore((state) => state.projects);
-  const [sublistData, setSublistData] = useState([]);
 
-  const [descriptionBeUpdating, setDescriptionBeUpdating] = useState(0);
-  const descriptionTimerRef = useRef({
-    control: null,
-    notice: null,
-  });
+  const [datePickerData, setDatePickerData] = useState(new Date());
+  const [projectSelector, setProjectSelector] = useState(false);
+
+  const titleRef = useRef(null);
+  const datePickerRef = useRef(null);
+  const descriptorRef = useRef(null);
 
   //..........//
 
-  const handleCloseClick = () => {
-    searchParams.delete("task");
-    setSearchParams(searchParams);
-  };
+  const {
+    handleCloseClick,
+    handleDeleteClick,
+    handleUpdateTitle,
+    handleUpdateExpiresAt,
+    handleUpdateProject,
+    handleSublistUpdate,
+    handleUpdateDescription,
 
-  const handleDeleteClick = () => {
-    if (confirm("¿Deseas eliminar esta tarea?")) {
-      inputLineRef.current.executeCommand(`/delete-task ${taskParam}`);
-    }
-  };
+    titleIsUpdating,
+    expiresIsUpdating,
+    projectIsUpdating,
+    sublistIsUpdating,
+    descriptionBeUpdating,
+  } = useHandleActions({
+    inputLineRef,
+    onCommand,
+  });
 
-  //const handleUpdateTitle = (evnt) => {};
+  const { sublistData, addItem, removeItem, updateItem } = useSublistData(
+    currentTask,
+    sublistIsUpdating === 1,
+  );
 
-  //const handleUpdateExpiresAt = () => {};
+  const boardStyle = useMemo(
+    () => ({
+      transform: `translateX(${!taskParam ? "100" : "0"}%)`,
+    }),
+    [taskParam],
+  );
 
-  //const handleUpdateProject = () => {};
+  //..........//
 
-  const handleAddSublistItem = (evnt) => {
-    const value = evnt.target.value;
-    if (evnt.key === "Enter" && value.trim() !== "") {
-      const newItem = {
-        id: crypto.randomUUID(),
-        text: value.trim(),
-      };
-      setSublistData((prev) => [...prev, newItem]);
+  const handleAddItem = (value, evnt) => {
+    if (evnt.key === "Enter" && value.trim()) {
+      const newSublist = [
+        ...sublistData,
+        {
+          id: crypto.randomUUID(),
+          isChecked: false,
+          subtitle: value.trim(),
+        },
+      ];
+      addItem(value);
       evnt.target.value = "";
+      handleSublistUpdate(newSublist);
     }
   };
 
-  const handleRemoveSublistItem = (evnt, itemId) => {
-    const value = evnt.target.value.trim();
-    if (evnt.key === "Enter" && value === "/delete") {
-      setSublistData((prev) => prev.filter((item) => item.id !== itemId));
-    }
+  const handleRemoveItem = (itemId) => {
+    const newSublist = sublistData.filter((item) => item.id !== itemId);
+    removeItem(itemId);
+    handleSublistUpdate(newSublist);
   };
 
-  const handleUpdateDescription = (evnt) => {
-    const value = evnt.target.value;
-
-    if (descriptionTimerRef.current.control)
-      clearTimeout(descriptionTimerRef.current.control);
-    if (descriptionTimerRef.current.notice)
-      clearTimeout(descriptionTimerRef.current.notice);
-
-    setDescriptionBeUpdating(0);
-
-    descriptionTimerRef.current.notice = setTimeout(() => {
-      setDescriptionBeUpdating(1);
-
-      descriptionTimerRef.current.control = setTimeout(() => {
-        inputLineRef.current.executeCommand(
-          `/set-task ${taskParam} @descriptor ${value}`,
-          {
-            onSuccess: () => setDescriptionBeUpdating(0),
-            onError: () => setDescriptionBeUpdating(2),
-          },
-        );
-      }, 250);
-    }, 2500);
+  const handleUpdateItem = (itemId, updates) => {
+    const newSublist = sublistData.map((item) =>
+      item.id === itemId ? { ...item, ...updates } : item,
+    );
+    updateItem(itemId, updates);
+    handleSublistUpdate(newSublist);
   };
 
   //..........//
 
   useEffect(() => {
-    elementRef.current.style.transform = `translateX(${!taskParam ? "100" : "0"}%)`;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [taskParam]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDatePickerData(currentTask?.expires_at);
+  }, [currentTask?.expires_at]);
 
   //..........//
 
   return (
-    <>
-      <div ref={elementRef} className={styles.taskBoard}>
-        {currentTask ? (
-          <>
-            <VscCloseAll
-              className={styles.closeIcon}
-              onClick={handleCloseClick}
-            />
+    <div ref={elementRef} className={styles.taskBoard} style={boardStyle}>
+      {currentTask ? (
+        <>
+          <VscCloseAll
+            className={styles.closeIcon}
+            onClick={handleCloseClick}
+          />
 
-            <AiTwotoneDelete
-              className={styles.deleteIcon}
-              onClick={handleDeleteClick}
-            />
+          <AiTwotoneDelete
+            className={styles.deleteIcon}
+            onClick={handleDeleteClick}
+          />
 
-            <p
-              className={styles.title}
-              onDoubleClick={() => console.log("edit task title")}
-            >
-              {currentTask.title}
-            </p>
+          <input
+            type="text"
+            className={styles.title}
+            style={titleIsUpdating ? { opacity: ".5" } : null}
+            ref={titleRef}
+            defaultValue={currentTask.title}
+            onDoubleClick={() => {
+              titleRef.current.readOnly = false;
+              titleRef.current.setSelectionRange(
+                titleRef.current.value.length,
+                titleRef.current.value.length,
+              );
+            }}
+            onKeyUp={(evnt) =>
+              evnt.key === "Enter" && !titleIsUpdating
+                ? handleUpdateTitle(evnt.target.value, () => {
+                    evnt.target.value = currentTask.title;
+                  })
+                : null
+            }
+            onFocus={() => (titleRef.current.readOnly = true)}
+            readOnly={false}
+          />
 
-            <br />
+          <br />
 
-            {currentTask.edited_at && (
-              <p className={styles.time}>
-                <span>
-                  <MdModeEdit />
-                  &nbsp;EDITADO
-                </span>
-                {new Date(currentTask.edited_at).toLocaleString("es", {
-                  dateStyle: "long",
-                  timeStyle: "short",
-                })}
-              </p>
-            )}
-
+          {currentTask.edited_at && (
             <p className={styles.time}>
               <span>
-                <FaPlus />
-                &nbsp;CREADO
+                <MdModeEdit />
+                &nbsp;EDITADO
               </span>
-              {new Date(currentTask.created_at).toLocaleString("es", {
+              {new Date(currentTask.edited_at).toLocaleString("es", {
                 dateStyle: "long",
                 timeStyle: "short",
+                hour12: true,
               })}
             </p>
+          )}
 
-            <br />
-            <br />
+          <p className={styles.time}>
+            <span>
+              <FaPlus />
+              &nbsp;CREADO
+            </span>
+            {new Date(currentTask.created_at).toLocaleString("es", {
+              dateStyle: "long",
+              timeStyle: "short",
+              hour12: true,
+            })}
+          </p>
 
-            <div className={styles.lineconf} onClick={() => null}>
-              <i>Fecha de vencimiento</i>
-              <p>Hoy</p>
-            </div>
+          <br />
+          <br />
 
-            <div className={styles.lineconf} onClick={() => null}>
-              <i>Ubicación</i>
-              <p>
-                {currentTask.project_id
-                  ? projectsData[currentTask.project_id].pname
-                  : null}
-              </p>
-            </div>
-
-            <br />
-            <br />
-
-            <i>Metas</i>
-            <div className={styles.sublist}>
-              {sublistData.map((itemData) => {
-                return (
-                  <div key={itemData.id}>
-                    <input type="checkbox" />
-                    <input
-                      type="text"
-                      placeholder="..."
-                      defaultValue={itemData.text}
-                      onKeyUp={(evnt) =>
-                        handleRemoveSublistItem(evnt, itemData.id)
-                      }
-                    />
-                  </div>
-                );
-              })}
-              <input
-                type="text"
-                placeholder="+ Agregar nueva meta"
-                style={{ backgroundColor: "transparent", paddingLeft: "30px" }}
-                onKeyUp={handleAddSublistItem}
-              />
-            </div>
-
-            <br />
-            <br />
-
-            <i>
-              Descripción
-              <span>
-                {
-                  [
-                    null,
-                    <>
-                      <MdModeEdit /> &nbsp;cargando...
-                    </>,
-                    <>
-                      <MdError /> &nbsp;error al actualizar
-                    </>,
-                  ][descriptionBeUpdating]
-                }
-              </span>
+          <div className={styles.lineconf}>
+            <i
+              onClick={
+                !expiresIsUpdating
+                  ? () => datePickerRef.current.setOpen(true)
+                  : null
+              }
+            >
+              Fecha de vencimiento
+              <DatePicker
+                ref={datePickerRef}
+                selected={datePickerData}
+                onChange={(date) => setDatePickerData(date)}
+                showTimeSelect
+                timeFormat="HH:mm"
+                timeIntervals={15}
+                timeCaption="Hora"
+                locale={es}
+                customInput={<div style={{ display: "none" }} />}
+              >
+                <button
+                  type="button"
+                  className={styles.cleanDatePicker}
+                  onClick={(evnt) => {
+                    evnt.stopPropagation();
+                    datePickerRef.current.setOpen(false);
+                    handleUpdateExpiresAt(datePickerData, () =>
+                      setDatePickerData(currentTask.expires_at),
+                    );
+                  }}
+                >
+                  <FaRegSave /> &nbsp;&nbsp;Actualizar
+                </button>
+                {datePickerData && (
+                  <button
+                    type="button"
+                    className={styles.cleanDatePicker}
+                    onClick={() => setDatePickerData(null)}
+                  >
+                    <TbWashDrycleanOff /> &nbsp;&nbsp;Eliminar fecha
+                  </button>
+                )}
+              </DatePicker>
             </i>
-            <textarea
-              className={styles.description}
-              placeholder="..."
-              rows={10}
-              onKeyUp={handleUpdateDescription}
-              defaultValue={currentTask.descriptor}
-            ></textarea>
+            <p
+              style={Object.assign(
+                { width: "150px" },
+                expiresIsUpdating ? { opacity: ".5" } : {},
+              )}
+            >
+              {currentTask.expires_at ? (
+                new Date(currentTask.expires_at).toLocaleString("es", {
+                  dateStyle: "long",
+                  timeStyle: "short",
+                  hour12: true,
+                })
+              ) : (
+                <>
+                  <PiEmptyLight /> &nbsp;&nbsp;NO DEFINIDO
+                </>
+              )}
+            </p>
+          </div>
 
-            <br />
-          </>
-        ) : (
-          "DATA_NOT_FOUND"
-        )}
-      </div>
-    </>
+          <div className={styles.lineconf}>
+            <i style={{ position: "relative" }}>
+              <span
+                onClick={
+                  !projectIsUpdating
+                    ? () => setProjectSelector(!projectSelector)
+                    : null
+                }
+              >
+                Ubicación
+              </span>
+              {projectSelector && (
+                <select
+                  className={styles.projectsListSelector}
+                  defaultValue={currentTask.project_id || ""}
+                  onChange={(evnt) =>
+                    handleUpdateProject(evnt.target.value, setProjectSelector)
+                  }
+                >
+                  <option value="null">SIN DEFINIR</option>
+                  {Object.entries(projectsData).map(
+                    ([projectId, projectData]) => (
+                      <option key={projectId} value={projectId}>
+                        {projectData.pname}
+                      </option>
+                    ),
+                  )}
+                </select>
+              )}
+            </i>
+            <p
+              style={projectIsUpdating ? { opacity: ".5" } : {}}
+              onClick={() => {
+                searchParams.set("project", currentTask.project_id);
+                setSearchParams(searchParams);
+              }}
+            >
+              {currentTask.project_id ? (
+                projectsData[currentTask.project_id].pname
+              ) : (
+                <>
+                  <PiEmptyLight /> &nbsp;&nbsp;NO DEFINIDO
+                </>
+              )}
+            </p>
+          </div>
+
+          <br />
+          <br />
+
+          <i>
+            Metas
+            <span>
+              {
+                [
+                  null,
+                  <>
+                    <MdModeEdit /> &nbsp;cargando...
+                  </>,
+                  <>
+                    <MdError /> &nbsp;error al actualizar
+                  </>,
+                ][sublistIsUpdating]
+              }
+            </span>
+          </i>
+          <div className={styles.sublist}>
+            {sublistData.map((itemData) => (
+              <div key={itemData.id}>
+                <input
+                  type="checkbox"
+                  checked={itemData.isChecked}
+                  onChange={() =>
+                    handleUpdateItem(itemData.id, {
+                      isChecked: !itemData.isChecked,
+                    })
+                  }
+                />
+
+                <input
+                  type="text"
+                  placeholder="..."
+                  value={itemData.subtitle}
+                  onChange={(evnt) =>
+                    updateItem(itemData.id, { subtitle: evnt.target.value })
+                  }
+                  onKeyDown={(evnt) => {
+                    if (evnt.key === "Backspace" && !itemData.subtitle) {
+                      handleRemoveItem(itemData.id);
+                    }
+                  }}
+                  onBlur={() => handleSublistUpdate(sublistData)}
+                />
+              </div>
+            ))}
+            <input
+              type="text"
+              placeholder="+ Agregar nueva meta"
+              style={{ backgroundColor: "transparent", paddingLeft: "30px" }}
+              onKeyDown={(evnt) => handleAddItem(evnt.target.value, evnt)}
+            />
+          </div>
+
+          <br />
+          <br />
+
+          <i>
+            Descripción
+            <span>
+              {
+                [
+                  null,
+                  <>
+                    <MdModeEdit /> &nbsp;cargando...
+                  </>,
+                  <>
+                    <MdError /> &nbsp;error al actualizar
+                  </>,
+                ][descriptionBeUpdating]
+              }
+            </span>
+          </i>
+          <textarea
+            className={styles.description}
+            defaultValue={currentTask.descriptor}
+            key={taskParam}
+            ref={descriptorRef}
+            onChange={(evnt) =>
+              handleUpdateDescription(evnt.target.value, () => {
+                evnt.target.value = currentTask.descriptor;
+              })
+            }
+            placeholder="..."
+            rows={10}
+          />
+
+          <br />
+        </>
+      ) : (
+        "DATA_NOT_FOUND"
+      )}
+    </div>
   );
 }

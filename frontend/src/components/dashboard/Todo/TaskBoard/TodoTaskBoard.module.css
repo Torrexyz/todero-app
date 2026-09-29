@@ -36,13 +36,15 @@
     top: 0px;
   }
 
-  & > p.title {
+  & > input[type="text"].title {
+    border: none;
     display: block;
     font-size: 1.5rem;
     padding: 10px 20px;
     padding-left: 0;
     width: 100%;
     max-width: 340px;
+    outline: none;
   }
 
   & > p.time {
@@ -146,4 +148,27 @@
       font-size: 0.9rem;
     }
   }
+}
+
+button[type="button"].cleanDatePicker {
+  align-items: center;
+  background-color: white;
+  border: 1px solid gray;
+  cursor: pointer;
+  float: left;
+  display: flex;
+  margin-bottom: 8px;
+  margin-right: 10px;
+  padding: 3px 6px;
+  outline: none;
+}
+
+select.projectsListSelector {
+  border: none;
+  transform: translateY(100%);
+  padding: 5px 10px;
+  outline: none;
+  position: absolute;
+  bottom: -8px;
+  right: -2px;
 }
