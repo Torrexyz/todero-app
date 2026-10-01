@@ -9,7 +9,7 @@ class TodoTaskModel {
 
   async fetchTasks({ userId }) {
     const execute = await query(
-      `SELECT * FROM tasks WHERE user_id = '${userId}' ORDER BY table_id DESC`,
+      `SELECT * FROM tasks WHERE user_id = '${userId}' ORDER BY table_id ASC`,
     );
     console.log(
       `#POSTGRES:SUCCESS > queried ${execute.rowCount} rows from [tasks]`,
@@ -17,13 +17,13 @@ class TodoTaskModel {
     return execute.rows;
   }
 
-  async createTask({ userId, projectId, title }) {
+  async createTask({ userId, projectId, title, expiresAt }) {
     const taskId = generateTaskId();
     const execute = await query(
-      `INSERT INTO public.tasks(public_id, user_id, project_id, title)
-       VALUES ($1, $2, $3, $4) 
+      `INSERT INTO public.tasks(public_id, user_id, project_id, title, expires_at)
+       VALUES ($1, $2, $3, $4, $5) 
        RETURNING *`,
-      [taskId, userId, projectId, title],
+      [taskId, userId, projectId, title, expiresAt],
     );
     console.log(
       `#POSTGRES:SUCCESS > new row created in [tasks] with public_id "${taskId}"`,

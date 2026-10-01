@@ -7,17 +7,17 @@ export const useProjectStore = create((set, get) => ({
 
   projects: {},
   loaded: false,
-  loading: false,
   error: null,
+  isLoading: false,
   isFetching: false,
 
   //..........//
 
   setProjects: (projects) => set(() => ({ projects, loaded: true })),
 
-  setLoading: (loading) => set({ loading }),
-
   setError: (error) => set({ error }),
+
+  setIsLoading: (isLoading) => set({ isLoading }),
 
   setIsFetching: (isFetching) => set({ isFetching }),
 
@@ -49,8 +49,8 @@ export const useProjectStore = create((set, get) => ({
     set({
       projects: {},
       loaded: false,
-      loading: false,
       error: null,
+      isLoading: false,
       isFetching: false,
     }),
 

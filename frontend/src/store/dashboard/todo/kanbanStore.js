@@ -7,17 +7,17 @@ export const useKanbanStore = create((set, get) => ({
 
   kbcolumns: {},
   loaded: false,
-  loading: false,
   error: null,
+  isLoading: false,
   isFetching: false,
 
   //..........//
 
   setKbcolumns: (kbcolumns) => set(() => ({ kbcolumns, loaded: true })),
 
-  setLoading: (loading) => set({ loading }),
-
   setError: (error) => set({ error }),
+
+  setIsLoading: (isLoading) => set({ isLoading }),
 
   setIsFetching: (isFetching) => set({ isFetching }),
 
@@ -49,8 +49,8 @@ export const useKanbanStore = create((set, get) => ({
     set({
       kbcolumns: {},
       loaded: false,
-      loading: false,
       error: null,
+      isLoading: false,
       isFetching: false,
     }),
 

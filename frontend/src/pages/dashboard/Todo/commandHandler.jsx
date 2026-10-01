@@ -9,9 +9,11 @@ export default function commandHandler({
 
   createKbcolumn,
   deleteKbcolumn,
-
-  projectParam,
 }) {
+  const searchParams = new URLSearchParams(location.search);
+  const projectParam = searchParams.get("project");
+  const filterParam = searchParams.get("filter");
+
   return async (reference, args) => {
     switch (reference) {
       //..........//
@@ -39,8 +41,48 @@ export default function commandHandler({
       //..........//
 
       case "create-task": {
+        const futureDateGenerator = {
+          today: () => {
+            const newDate = new Date();
+            newDate.setHours(23, 59, 59, 999);
+            return newDate.toISOString();
+          },
+          tomorrow: () => {
+            const newDate = new Date();
+            newDate.setDate(newDate.getDate() + 1);
+            newDate.setHours(23, 59, 59, 999);
+            return newDate.toISOString();
+          },
+          week: () => {
+            const newDate = new Date();
+            const currentDayOfWeek = newDate.getDay();
+            const daysUntilSunday =
+              currentDayOfWeek === 0 ? 0 : 7 - currentDayOfWeek;
+
+            newDate.setDate(newDate.getDate() + daysUntilSunday);
+            newDate.setHours(23, 59, 59, 999);
+            return newDate.toISOString();
+          },
+          month: () => {
+            const newDate = new Date();
+            const lastDayOfMonth = new Date(
+              newDate.getFullYear(),
+              newDate.getMonth() + 1,
+              0,
+            );
+
+            newDate.setDate(lastDayOfMonth.getDate());
+            newDate.setHours(23, 59, 59, 999);
+            return newDate.toISOString();
+          },
+        };
+
         try {
-          const query = await createTask(projectParam, args);
+          const query = await createTask(
+            projectParam,
+            args,
+            futureDateGenerator[filterParam]?.() || null,
+          );
           return query.success ? query.data : null;
         } catch (err) {
           throw err;

@@ -1,6 +1,7 @@
 .taskBoard {
   background-color: white;
   border-left: 3.5px dashed rgb(200, 200, 200);
+  height: stretch;
   width: 100%;
   max-width: 400px;
   transform: translateX(100%);

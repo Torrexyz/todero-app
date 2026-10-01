@@ -11,12 +11,13 @@ import styles from "./TodoTaskList.module.css";
 
 //====================//
 
-export default function TodoTaskList({ taskBoardRef, inputLineRef }) {
+export default function TodoTaskList({ defaultFilters, inputLineRef }) {
   //..........//
 
   const tasksData = useTaskStore((state) => state.tasks);
-  const taskLoading = useTaskStore((state) => state.loading);
   const taskError = useTaskStore((state) => state.error);
+  const taskIsFetching = useTaskStore((state) => state.isFetching);
+  const taskIsLoading = useTaskStore((state) => state.isLoading);
 
   const { refreshTasks } = useTodoTask();
 
@@ -24,15 +25,19 @@ export default function TodoTaskList({ taskBoardRef, inputLineRef }) {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const filteredTasks = Object.fromEntries(
-    Object.entries(tasksData).filter(([, value]) => {
-      if (searchParams.get("project")) {
-        return value.project_id === searchParams.get("project");
-      } else if (searchParams.get("filter")) {
-        return value.project_id === null;
-      }
-    }),
-  );
+  const filteredTasks = searchParams.get("project")
+    ? Object.fromEntries(
+        Object.entries(tasksData).filter(([, value]) => {
+          return value.project_id === searchParams.get("project");
+        }),
+      )
+    : defaultFilters[searchParams.get("filter")].call(
+        Object.fromEntries(
+          Object.entries(tasksData).filter(([, value]) => {
+            return value.project_id === null;
+          }),
+        ),
+      );
 
   let skipEmptyTasks = false;
   if (Object.keys(filteredTasks).length === 0) skipEmptyTasks = true;
@@ -43,23 +48,25 @@ export default function TodoTaskList({ taskBoardRef, inputLineRef }) {
     <>
       <ul className={styles.taskList}>
         {!taskError ? (
-          !taskLoading ? (
+          !taskIsFetching ? (
             !skipEmptyTasks ? (
               Object.entries(filteredTasks).map(([taskId, taskData]) => {
                 return (
                   <li
                     key={taskId}
-                    onClick={() => {
-                      searchParams.set("task", taskId);
-                      setSearchParams(searchParams);
-                      taskId !== "empty" &&
-                        (taskBoardRef.current.style.transform =
-                          "translateX(0%)");
-                    }}
+                    onClick={
+                      !taskIsLoading
+                        ? () => {
+                            searchParams.set("task", taskId);
+                            setSearchParams(searchParams);
+                          }
+                        : null
+                    }
                   >
                     <input
                       type="checkbox"
                       defaultChecked={taskData.is_checked}
+                      disabled={taskIsLoading}
                       onClick={(evnt) => {
                         evnt.stopPropagation();
                         evnt.target.disabled = true;

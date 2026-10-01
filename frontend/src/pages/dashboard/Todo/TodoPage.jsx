@@ -11,7 +11,8 @@ import { useTodoTask } from "@hooks/dashboard/todo/useTask";
 import { useTodoProject } from "@hooks/dashboard/todo/useProject";
 import { useTodoKanban } from "@hooks/dashboard/todo/useKanban";
 
-import { DEFAULT_FILTER_ELEMENTS } from "./DefaultFilterElements";
+import DEFAULT_FILTERS from "@constants/dashboard/todo/defaultFilters";
+
 import commandHandler from "./commandHandler";
 import styles from "./TodoPage.module.css";
 
@@ -56,8 +57,6 @@ export default function TodoPage() {
         createKbcolumn,
         deleteKbcolumn,
         updateKbcolumn,
-
-        projectParam,
       }),
     [
       createProject,
@@ -71,17 +70,14 @@ export default function TodoPage() {
       createKbcolumn,
       deleteKbcolumn,
       updateKbcolumn,
-
-      projectParam,
     ],
   );
 
   const currentFilter =
-    DEFAULT_FILTER_ELEMENTS[filterParam] ||
+    DEFAULT_FILTERS[filterParam]?.element ||
     projectsData[projectParam]?.pname ||
     "(?) desconocido";
 
-  const taskBoardRef = useRef(null);
   const inputLineRef = useRef(null);
 
   //..........//
@@ -93,23 +89,24 @@ export default function TodoPage() {
   ) {
     return (
       <>
-        <TodoAsideList defaultFilterElements={DEFAULT_FILTER_ELEMENTS} />
+        <TodoAsideList defaultFilters={DEFAULT_FILTERS} />
 
         <div className={styles.todoPage}>
           <h1 className={styles.title}>{currentFilter}</h1>
 
-          <TodoInputLine onCommand={handleCommand} elementRef={inputLineRef} />
+          <TodoInputLine
+            onCommand={handleCommand}
+            inputLineRef={inputLineRef}
+          />
 
           <TodoTaskList
-            taskBoardRef={taskBoardRef}
+            defaultFilters={DEFAULT_FILTERS}
             inputLineRef={inputLineRef}
           />
           <TodoKanbanView />
 
           <TodoTaskBoard
-            elementRef={taskBoardRef}
             currentTask={tasksData[taskParam]}
-            inputLineRef={inputLineRef}
             onCommand={handleCommand}
           />
         </div>

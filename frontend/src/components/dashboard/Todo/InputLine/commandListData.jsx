@@ -4,7 +4,7 @@ import styles from "./TodoInputLine.module.css";
 
 //====================//
 
-export const COMMAND_LIST_DATA = {
+const COMMAND_LIST_DATA = {
   //..........//
 
   "create-project": {
@@ -113,10 +113,10 @@ export const COMMAND_LIST_DATA = {
     description: "Muestra todos los comandos disponibles",
     usage: "/help",
     auxcall: ({
+      handleInputChange,
       setHelpInfoElement,
       commandList,
-      entryRef,
-      handleInputChange,
+      inputLineRef,
     }) => {
       setHelpInfoElement(
         <>
@@ -124,16 +124,16 @@ export const COMMAND_LIST_DATA = {
             className={styles.helpInfoPopup}
             onClick={() => setHelpInfoElement(null)}
           >
-            <div className={styles.suggestBox} style={{ position: "unset" }}>
+            <div className={styles.matchesBox} style={{ position: "unset" }}>
               {Object.entries(commandList).map(
                 ([command, data]) =>
                   command !== "help" && (
                     <div
                       key={command}
-                      className={styles.suggestItem}
+                      className={styles.matchItem}
                       onClick={() => {
-                        entryRef.current.value = `/${command} `;
-                        entryRef.current.focus();
+                        inputLineRef.current.value = `/${command} `;
+                        inputLineRef.current.focus();
                         handleInputChange();
                       }}
                     >
@@ -156,3 +156,7 @@ export const COMMAND_LIST_DATA = {
 
   //..........//
 };
+
+//====================//
+
+export default COMMAND_LIST_DATA;

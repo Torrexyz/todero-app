@@ -9,7 +9,7 @@ class TodoKanbanModel {
 
   async fetchKanban({ userId, projectId }) {
     const result = await query(
-      `SELECT * FROM kanban WHERE user_id = '${userId}' AND project_id = '${projectId}' ORDER BY id DESC`,
+      `SELECT * FROM kanban WHERE user_id = '${userId}' AND project_id = '${projectId}' ORDER BY id ASC`,
     );
     console.log(`#POSTGRES:SUCCESS > queried rows from [kanban]`);
     return result.rows;

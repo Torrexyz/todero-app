@@ -171,13 +171,17 @@ class TodoTaskController {
 
   async createTask(req, res, next) {
     try {
-      const { userId, projectId, title } = req.body;
+      const { userId, projectId, title, expiresAt } = req.body;
 
       if (await TodoAuthController.userAuth(res, { userId })) {
+        const expiresAtCheck = this.expiresAtCheck(res, expiresAt);
+        if (!expiresAtCheck) return expiresAtCheck;
+
         const query = await TodoTaskModel.createTask({
           userId,
           projectId: projectId || null,
           title,
+          expiresAt: expiresAt || null,
         });
 
         res.status(201).json({

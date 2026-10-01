@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router";
 
 //====================//
 
-export default function useHandleActions({ inputLineRef, onCommand }) {
+export default function useHandleActions({ onCommand }) {
   //..........//
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,7 +28,7 @@ export default function useHandleActions({ inputLineRef, onCommand }) {
 
   const handleDeleteClick = () => {
     if (confirm("¿Deseas eliminar esta tarea?")) {
-      inputLineRef.current.executeCommand(`/delete-task ${taskParam}`);
+      onCommand("delete-task", `${taskParam}`);
     }
   };
 

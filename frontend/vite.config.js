@@ -10,6 +10,7 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "./src"),
       "@assets": path.resolve(import.meta.dirname, "./src/assets"),
       "@components": path.resolve(import.meta.dirname, "./src/components"),
+      "@constants": path.resolve(import.meta.dirname, "./src/constants"),
       "@context": path.resolve(import.meta.dirname, "./src/context"),
       "@hooks": path.resolve(import.meta.dirname, "./src/hooks"),
       "@pages": path.resolve(import.meta.dirname, "./src/pages"),

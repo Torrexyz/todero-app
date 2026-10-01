@@ -9,7 +9,7 @@ class TodoProjectModel {
 
   async fetchProjects({ userId }) {
     const execute = await query(
-      `SELECT * FROM projects WHERE user_id = '${userId}' ORDER BY table_id DESC`,
+      `SELECT * FROM projects WHERE user_id = '${userId}' ORDER BY table_id ASC`,
     );
     console.log(
       `#POSTGRES:SUCCESS > queried ${execute.rowCount} rows from [projects]`,

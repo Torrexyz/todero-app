@@ -22,12 +22,7 @@ import "./datePicker.css";
 
 //====================//
 
-export default function TodoTaskBoard({
-  elementRef,
-  currentTask,
-  inputLineRef,
-  onCommand,
-}) {
+export default function TodoTaskBoard({ currentTask, onCommand }) {
   //..........//
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -38,6 +33,7 @@ export default function TodoTaskBoard({
   const [datePickerData, setDatePickerData] = useState(new Date());
   const [projectSelector, setProjectSelector] = useState(false);
 
+  const taskBoardRef = useRef(null);
   const titleRef = useRef(null);
   const datePickerRef = useRef(null);
   const descriptorRef = useRef(null);
@@ -58,10 +54,7 @@ export default function TodoTaskBoard({
     projectIsUpdating,
     sublistIsUpdating,
     descriptionBeUpdating,
-  } = useHandleActions({
-    inputLineRef,
-    onCommand,
-  });
+  } = useHandleActions({ onCommand });
 
   const { sublistData, addItem, removeItem, updateItem } = useSublistData(
     currentTask,
@@ -110,14 +103,17 @@ export default function TodoTaskBoard({
   //..........//
 
   useEffect(() => {
+    if (taskBoardRef.current)
+      taskBoardRef.current.style.transform = `translateX(${currentTask ? 0 : 100}%)`;
+
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDatePickerData(currentTask?.expires_at);
-  }, [currentTask?.expires_at]);
+  }, [currentTask]);
 
   //..........//
 
   return (
-    <div ref={elementRef} className={styles.taskBoard} style={boardStyle}>
+    <div ref={taskBoardRef} className={styles.taskBoard} style={boardStyle}>
       {currentTask ? (
         <>
           <VscCloseAll
@@ -132,9 +128,10 @@ export default function TodoTaskBoard({
 
           <input
             type="text"
+            key={"title" + currentTask.table_id}
+            ref={titleRef}
             className={styles.title}
             style={titleIsUpdating ? { opacity: ".5" } : null}
-            ref={titleRef}
             defaultValue={currentTask.title}
             onDoubleClick={() => {
               titleRef.current.readOnly = false;
@@ -372,17 +369,17 @@ export default function TodoTaskBoard({
             </span>
           </i>
           <textarea
+            key={"descriptor" + currentTask.table_id}
+            ref={descriptorRef}
             className={styles.description}
             defaultValue={currentTask.descriptor}
-            key={taskParam}
-            ref={descriptorRef}
+            placeholder="..."
+            rows={10}
             onChange={(evnt) =>
               handleUpdateDescription(evnt.target.value, () => {
                 evnt.target.value = currentTask.descriptor;
               })
             }
-            placeholder="..."
-            rows={10}
           />
 
           <br />

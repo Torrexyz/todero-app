@@ -22,8 +22,8 @@ export function useTodoProject({ autoFetch = false } = {}) {
   const projectError = useProjectStore((state) => state.error);
 
   const setProjects = useProjectStore((state) => state.setProjects);
-  const setLoading = useProjectStore((state) => state.setLoading);
   const setError = useProjectStore((state) => state.setError);
+  const setIsLoading = useProjectStore((state) => state.setIsLoading);
   const setIsFetching = useProjectStore((state) => state.setIsFetching);
 
   const addProject = useProjectStore((state) => state.addProject);
@@ -56,9 +56,8 @@ export function useTodoProject({ autoFetch = false } = {}) {
         return;
       }
 
-      setIsFetching(true);
-      setLoading(true);
       setError(null);
+      setIsFetching(true);
       consolInfo("#API:PROJECTS (FETCH)", "(PROCESS) Fetching data..");
 
       try {
@@ -79,32 +78,17 @@ export function useTodoProject({ autoFetch = false } = {}) {
         if (isMounted.current) setError(err.message);
         throw err;
       } finally {
-        setIsFetching(false);
-        if (isMounted.current) setLoading(false);
+        if (isMounted.current) setIsFetching(false);
       }
     },
-    [userId, setProjects, setLoading, setError, setIsFetching],
+    [userId, setProjects, setError, setIsFetching],
   );
 
   const createProject = useCallback(
     async (pname) => {
       if (!isMounted.current) return;
 
-      /*
-      const projectStore = useProjectStore.getState();
-
-      if (projectStore.isFetching) {
-        consolWarn(
-          "#API:PROJECTS (CREATE)",
-          "(ABORT) Previous fetch not finished",
-        );
-        return;
-      }
-
-      setIsFetching(true);
-      setLoading(true);
-      setError(null);
-      */
+      setIsLoading(true);
       consolInfo("#API:PROJECTS (CREATE)", "(PROCESS) Creating project..");
 
       try {
@@ -120,39 +104,21 @@ export function useTodoProject({ autoFetch = false } = {}) {
 
         consolInfo("#API:PROJECTS (CREATE)", "(SUCCESS) Project created");
         return execute;
-        // eslint-disable-next-line no-useless-catch
       } catch (err) {
-        //consolError("#API:PROJECTS (CREATE)", err.message);
-        //if (isMounted.current) setError(err.message);
+        consolError("#API:PROJECTS (CREATE)", err.message);
         throw err;
       } finally {
-        //setIsFetching(false);
-        //if (isMounted.current) setLoading(false);
+        if (isMounted.current) setIsLoading(false);
       }
     },
-    [userId, addProject, navigate],
+    [userId, addProject, navigate, setIsLoading],
   );
 
   const deleteProject = useCallback(
     async (projectId) => {
       if (!isMounted.current) return;
 
-      /*
-      const projectStore = useProjectStore.getState();
-
-      if (projectStore.isFetching) {
-        consolWarn(
-          "#API:PROJECTS (DELETE)",
-          "(ABORT) Previous fetch not finished",
-        );
-        return;
-      }
-
-      setIsFetching(true);
-      setLoading(true);
-      setError(null);
-      */
-
+      setIsLoading(true);
       consolInfo("#API:PROJECTS (DELETE)", "(PROCESS) Deleting project..");
 
       try {
@@ -172,17 +138,14 @@ export function useTodoProject({ autoFetch = false } = {}) {
 
         consolInfo("#API:PROJECTS (DELETE)", "(SUCCESS) Project deleted");
         return execute;
-        // eslint-disable-next-line no-useless-catch
       } catch (err) {
-        //consolError("#API:PROJECTS (DELETE)", err.message);
-        //if (isMounted.current) setError(err.message);
+        consolError("#API:PROJECTS (DELETE)", err.message);
         throw err;
       } finally {
-        //setIsFetching(false);
-        //if (isMounted.current) setLoading(false);
+        if (isMounted.current) setIsLoading(false);
       }
     },
-    [userId, removeProject, navigate],
+    [userId, removeProject, navigate, setIsLoading],
   );
 
   //..........//

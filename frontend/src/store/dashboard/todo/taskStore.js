@@ -7,17 +7,17 @@ export const useTaskStore = create((set, get) => ({
 
   tasks: {},
   loaded: false,
-  loading: false,
   error: null,
+  isLoading: false,
   isFetching: false,
 
   //..........//
 
   setTasks: (tasks) => set(() => ({ tasks, loaded: true })),
 
-  setLoading: (loading) => set({ loading }),
-
   setError: (error) => set({ error }),
+
+  setIsLoading: (isLoading) => set({ isLoading }),
 
   setIsFetching: (isFetching) => set({ isFetching }),
 
@@ -49,8 +49,8 @@ export const useTaskStore = create((set, get) => ({
     set({
       tasks: {},
       loaded: false,
-      loading: false,
       error: null,
+      isLoading: false,
       isFetching: false,
     }),
 

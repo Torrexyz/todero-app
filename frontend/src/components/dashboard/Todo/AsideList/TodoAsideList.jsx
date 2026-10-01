@@ -11,7 +11,7 @@ import styles from "./TodoAsideList.module.css";
 
 //====================//
 
-export default function TodoAsideList({ defaultFilterElements }) {
+export default function TodoAsideList({ defaultFilters }) {
   //..........//
 
   const navigate = useNavigate();
@@ -20,9 +20,9 @@ export default function TodoAsideList({ defaultFilterElements }) {
   //..........//
 
   const projectsData = useProjectStore((state) => state.projects);
-  const projectLoading = useProjectStore((state) => state.loading);
   const projectError = useProjectStore((state) => state.error);
-  
+  const projectIsFetching = useProjectStore((state) => state.isFetching);
+
   const { refreshProjects } = useTodoProject({ autoFetch: false });
 
   let skipEmptyProjects = false;
@@ -33,24 +33,24 @@ export default function TodoAsideList({ defaultFilterElements }) {
   return (
     <>
       <ul className={styles.asideList}>
-        {Object.entries(defaultFilterElements).map(
-          ([filterId, childElement]) => (
-            <li
-              key={filterId}
-              onClick={() =>
-                navigate({
-                  pathname: location.pathname,
-                  search: "?filter=" + filterId,
-                })
-              }
-            >
-              {childElement}
-            </li>
-          ),
-        )}
+        {Object.entries(defaultFilters).map(([filterId, filterObj]) => (
+          <li
+            key={filterId}
+            onClick={() =>
+              navigate({
+                pathname: location.pathname,
+                search: "?filter=" + filterId,
+              })
+            }
+          >
+            {filterObj.element}
+          </li>
+        ))}
+
         <hr />
+
         {!projectError ? (
-          !projectLoading ? (
+          !projectIsFetching ? (
             !skipEmptyProjects ? (
               Object.entries(projectsData).map(([projectId, projectData]) => {
                 return (
